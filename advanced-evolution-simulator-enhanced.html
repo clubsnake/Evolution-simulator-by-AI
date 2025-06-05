@@ -1,0 +1,4580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Advanced Evolution Simulator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      background-color: #2c3e50;
+      color: white;
+      padding: 15px 0;
+      margin-bottom: 20px;
+    }
+    
+    header h1 {
+      margin: 0;
+      padding: 0 20px;
+      font-size: 24px;
+    }
+    
+    .simulation-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    
+    .canvas-container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+    }
+    
+    canvas {
+      display: block;
+      background-color: #f0f0f0;
+      border: 1px solid #ddd;
+    }
+    
+    .controls-container {
+      flex: 1;
+      min-width: 300px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+    }
+    
+    .control-group {
+      margin-bottom: 15px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .control-group:last-child {
+      border-bottom: none;
+    }
+    
+    .control-group h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #2c3e50;
+    }
+    
+    .control-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    
+    label {
+      flex: 2;
+      font-size: 14px;
+    }
+    
+    input[type="range"] {
+      flex: 3;
+      margin: 0 10px;
+    }
+    
+    input[type="number"] {
+      width: 60px;
+      padding: 4px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    select {
+      padding: 4px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+    
+    button:hover {
+      background-color: #2980b9;
+    }
+    
+    button.primary {
+      background-color: #2ecc71;
+    }
+    
+    button.primary:hover {
+      background-color: #27ae60;
+    }
+    
+    button.danger {
+      background-color: #e74c3c;
+    }
+    
+    button.danger:hover {
+      background-color: #c0392b;
+    }
+    
+    .stats-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      width: 100%;
+      margin-top: 20px;
+    }
+    
+    .stats-panel {
+      flex: 1;
+      min-width: 300px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+    }
+    
+    .stats-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .stats-label {
+      font-weight: bold;
+    }
+    
+    .legend {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 8px;
+      margin-top: 15px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+    }
+    
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      margin-right: 6px;
+    }
+    
+    .charts-container {
+      width: 100%;
+      margin-top: 20px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid #ddd;
+      margin-bottom: 15px;
+    }
+    
+    .tab {
+      padding: 8px 16px;
+      cursor: pointer;
+      background-color: #f5f5f5;
+      border-radius: 4px 4px 0 0;
+      margin-right: 4px;
+    }
+    
+    .tab.active {
+      background-color: #3498db;
+      color: white;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Tooltips */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      margin-left: 5px;
+      width: 16px;
+      height: 16px;
+      background-color: #ddd;
+      color: #555;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 16px;
+      font-size: 12px;
+      cursor: help;
+    }
+    
+    .tooltip:hover .tooltip-text {
+      visibility: visible;
+      opacity: 1;
+    }
+    
+    .tooltip-text {
+      visibility: hidden;
+      opacity: 0;
+      width: 200px;
+      background-color: #555;
+      color: #fff;
+      text-align: center;
+      border-radius: 6px;
+      padding: 5px;
+      position: absolute;
+      z-index: 1;
+      bottom: 125%;
+      left: 50%;
+      transform: translateX(-50%);
+      transition: opacity 0.3s;
+      font-size: 12px;
+      pointer-events: none;
+    }
+    
+    .tooltip-text::after {
+      content: "";
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      margin-left: -5px;
+      border-width: 5px;
+      border-style: solid;
+      border-color: #555 transparent transparent transparent;
+    }
+    
+    /* Loading indicator */
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #3498db;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 2s linear infinite;
+      margin: 20px auto;
+      display: none;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 60%;
+      max-width: 600px;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+    
+    .modal-header h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+    
+    .close-modal {
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .simulation-container {
+        flex-direction: column;
+      }
+      
+      .modal-content {
+        width: 90%;
+        margin: 20% auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Advanced Evolution Simulator</h1>
+  </header>
+  
+  <div class="container">
+    <div class="simulation-container">
+      <div class="canvas-container">
+        <canvas id="simulation-canvas" width="800" height="600"></canvas>
+      </div>
+      
+      <div class="controls-container">
+        <div class="control-group">
+          <h3>Simulation Controls</h3>
+          <div class="control-row">
+            <button id="start-btn" class="primary">Start</button>
+            <button id="pause-btn">Pause</button>
+            <button id="reset-btn" class="danger">Reset</button>
+          </div>
+          <div class="control-row">
+            <label for="simulation-speed">Simulation Speed</label>
+            <input type="range" id="simulation-speed" min="1" max="20" value="5">
+            <span id="speed-value">5</span>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <h3>Environment Settings</h3>
+          <div class="control-row">
+            <label for="world-size">World Size</label>
+            <input type="range" id="world-size" min="50" max="200" value="100">
+            <span id="world-size-value">100</span>
+          </div>
+          <div class="control-row">
+            <label for="resource-rate">Resource Generation Rate</label>
+            <input type="range" id="resource-rate" min="1" max="20" value="10">
+            <span id="resource-rate-value">10</span>
+          </div>
+          <div class="control-row">
+            <label for="climate-variability">Climate Variability</label>
+            <input type="range" id="climate-variability" min="0" max="10" value="5">
+            <span id="climate-variability-value">5</span>
+          </div>
+          <div class="control-row">
+            <label>Terrain Complexity</label>
+            <input type="range" id="terrain-complexity" min="1" max="10" value="5">
+            <span id="terrain-complexity-value">5</span>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <h3>Genetic Settings</h3>
+          <div class="control-row">
+            <label for="mutation-rate">Mutation Rate</label>
+            <input type="range" id="mutation-rate" min="0" max="10" value="3">
+            <span id="mutation-rate-value">3%</span>
+          </div>
+          <div class="control-row">
+            <label for="mutation-magnitude">Mutation Magnitude</label>
+            <input type="range" id="mutation-magnitude" min="1" max="10" value="5">
+            <span id="mutation-magnitude-value">5</span>
+          </div>
+          <div class="control-row">
+            <label for="reproduction-type">Reproduction Type</label>
+            <select id="reproduction-type">
+              <option value="asexual">Asexual</option>
+              <option value="sexual">Sexual</option>
+              <option value="mixed" selected>Mixed</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <h3>Population Settings</h3>
+          <div class="control-row">
+            <label for="initial-plants">Initial Plants</label>
+            <input type="range" id="initial-plants" min="10" max="500" value="100">
+            <span id="initial-plants-value">100</span>
+          </div>
+          <div class="control-row">
+            <label for="initial-herbivores">Initial Herbivores</label>
+            <input type="range" id="initial-herbivores" min="10" max="200" value="50">
+            <span id="initial-herbivores-value">50</span>
+          </div>
+          <div class="control-row">
+            <label for="initial-omnivores">Initial Omnivores</label>
+            <input type="range" id="initial-omnivores" min="0" max="100" value="30">
+            <span id="initial-omnivores-value">30</span>
+          </div>
+          <div class="control-row">
+            <label for="initial-carnivores">Initial Carnivores</label>
+            <input type="range" id="initial-carnivores" min="5" max="100" value="20">
+            <span id="initial-carnivores-value">20</span>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <h3>Advanced Features</h3>
+          <div class="control-row">
+            <label for="enable-diseases">Enable Diseases</label>
+            <input type="checkbox" id="enable-diseases">
+          </div>
+          <div class="control-row">
+            <label for="enable-day-night">Enable Day/Night Cycle</label>
+            <input type="checkbox" id="enable-day-night" checked>
+          </div>
+          <div class="control-row">
+            <label for="enable-random-events">Enable Random Events</label>
+            <input type="checkbox" id="enable-random-events" checked>
+          </div>
+          <div class="control-row">
+            <label for="omnivore-plant-ratio">Omnivore Plant Preference</label>
+            <input type="range" id="omnivore-plant-ratio" min="0" max="100" value="50">
+            <span id="omnivore-plant-ratio-value">50%</span>
+          </div>
+          <div class="control-row">
+            <label for="starvation-rate">Animal Starvation Rate</label>
+            <input type="range" id="starvation-rate" min="10" max="200" value="100">
+            <span id="starvation-rate-value">100%</span>
+          </div>
+          <div class="control-row">
+            <label for="plant-starvation-rate">Plant Starvation Rate</label>
+            <input type="range" id="plant-starvation-rate" min="10" max="300" value="100">
+            <span id="plant-starvation-rate-value">100%</span>
+          </div>
+          <div class="control-row">
+            <label for="reproduction-modifier">Reproduction Difficulty</label>
+            <input type="range" id="reproduction-modifier" min="50" max="200" value="100">
+            <span id="reproduction-modifier-value">100%</span>
+          </div>
+        </div>
+        
+        <div class="control-group">
+          <button id="save-simulation" class="primary">Save Simulation</button>
+          <button id="load-simulation">Load Simulation</button>
+          <button id="show-help">Help / Info</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="stats-container">
+      <div class="stats-panel">
+        <h3>Population Statistics</h3>
+        <div class="stats-row">
+          <span class="stats-label">Generation:</span>
+          <span id="generation-count">0</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-label">Total Organisms:</span>
+          <span id="total-organisms">0</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-label">Plants:</span>
+          <span id="plant-count">0</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-label">Herbivores:</span>
+          <span id="herbivore-count">0</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-label">Omnivores:</span>
+          <span id="omnivore-count">0</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-label">Carnivores:</span>
+          <span id="carnivore-count">0</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-label">Genetic Diversity:</span>
+          <span id="genetic-diversity">0.00</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-label">Average Fitness:</span>
+          <span id="average-fitness">0.00</span>
+        </div>
+      </div>
+      
+      <div class="stats-panel">
+        <h3>Environment Status</h3>
+        <div class="stats-row">
+          <span class="stats-label">Current Temperature:</span>
+          <span id="current-temperature">20°C</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-label">Current Precipitation:</span>
+          <span id="current-precipitation">50%</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-label">Resource Abundance:</span>
+          <span id="resource-abundance">100%</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-label">Time of Day:</span>
+          <span id="time-of-day">Day</span>
+        </div>
+        <div class="stats-row">
+          <span class="stats-label">Season:</span>
+          <span id="current-season">Summer</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="charts-container">
+      <div class="tabs">
+        <div class="tab active" data-tab="population-chart">Population</div>
+        <div class="tab" data-tab="resource-chart">Resources</div>
+        <div class="tab" data-tab="trait-chart">Traits</div>
+        <div class="tab" data-tab="phylogeny-chart">Phylogeny</div>
+      </div>
+      
+      <div class="tab-content active" id="population-chart">
+        <canvas id="population-chart-canvas" height="300"></canvas>
+      </div>
+      
+      <div class="tab-content" id="resource-chart">
+        <canvas id="resource-chart-canvas" height="300"></canvas>
+      </div>
+      
+      <div class="tab-content" id="trait-chart">
+        <canvas id="trait-chart-canvas" height="300"></canvas>
+      </div>
+      
+      <div class="tab-content" id="phylogeny-chart">
+        <canvas id="phylogeny-chart-canvas" height="300"></canvas>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Help Modal -->
+  <div id="help-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Evolution Simulator Help</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body">
+        <h3>About This Simulator</h3>
+        <p>This advanced evolution simulator models artificial life forms evolving in a complex ecosystem. Organisms have genomes that encode traits, and they evolve through natural selection, mutation, and reproduction.</p>
+        
+        <h3>Simulation Features</h3>
+        <ul>
+          <li><strong>Genetic System:</strong> Organisms carry genes for speed, size, sensory range, metabolism, and reproduction</li>
+          <li><strong>Environment:</strong> Variable terrain types, dynamic resources, climate system, day/night cycles</li>
+          <li><strong>Ecological Interactions:</strong> Food web with multiple trophic levels, predator-prey dynamics</li>
+          <li><strong>Visualization:</strong> Real-time graphics and statistics tracking</li>
+        </ul>
+        
+        <h3>Organism Types</h3>
+        <ul>
+          <li><strong>Plants (green):</strong> Stationary producers that convert sunlight to energy</li>
+          <li><strong>Herbivores (blue circles):</strong> Primary consumers that eat only plants</li>
+          <li><strong>Omnivores (yellow/orange diamonds):</strong> Consumers that eat both plants and other animals</li>
+          <li><strong>Carnivores (red triangles):</strong> Secondary consumers that hunt other animals</li>
+        </ul>
+        
+        <h3>Color Variations</h3>
+        <p>Color variations within species (lighter/darker blues, orange-red variations) indicate genetic diversity. These colors are determined by genes that mutate over generations, allowing you to visually track evolutionary lineages.</p>
+        
+        <h3>Environmental Factors</h3>
+        <p><strong>Precipitation:</strong> Affects plant growth (optimal between 40-80%), resource distribution, and terrain fertility. Changes seasonally, creating cycles of abundance and scarcity.</p>
+        
+        <h3>Controls</h3>
+        <p>Use the control panel to adjust parameters of the simulation. Key settings include:</p>
+        <ul>
+          <li>Simulation speed: Controls how fast the simulation runs</li>
+          <li>Population settings: Adjust initial numbers of each species</li>
+          <li>Animal starvation rate: How quickly animals lose energy</li>
+          <li>Plant starvation rate: How quickly plants lose energy (higher values = fewer plants)</li>
+          <li>Reproduction difficulty: Energy needed to reproduce (higher = less reproduction)</li>
+          <li>Environmental conditions: Climate variability and terrain complexity</li>
+        </ul>
+        
+        <h3>Tracking Evolution</h3>
+        <p>The charts show the progress of evolution over time. You can observe:</p>
+        <ul>
+          <li>Population changes</li>
+          <li>Resource availability</li>
+          <li>Trait distributions</li>
+          <li>Evolutionary relationships (phylogeny)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Save/Load Modal -->
+  <div id="save-load-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="save-load-title">Save Simulation</h2>
+        <span class="close-modal">&times;</span>
+      </div>
+      <div class="modal-body" id="save-load-body">
+        <!-- Content will be inserted by JavaScript -->
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    /**
+     * Advanced Evolution Simulator
+     * ============================
+     * A complex simulation of artificial life with genetics, environment, and ecology
+     */
+    
+    // ============= Utility Functions =============
+    
+    // Simple Perlin-like noise implementation for terrain generation
+    const noiseGenerator = {
+      // Permutation table
+      p: Array(512),
+      
+      // Initialize with a seed
+      init: function(seed = 1) {
+        // Create permutation table
+        this.seed = seed;
+        const permutation = [];
+        for (let i = 0; i < 256; i++) {
+          permutation[i] = i;
+        }
+        
+        // Fisher-Yates shuffle
+        for (let i = 255; i > 0; i--) {
+          const j = Math.floor(this.random() * (i + 1));
+          [permutation[i], permutation[j]] = [permutation[j], permutation[i]];
+        }
+        
+        // Duplicate and store in p
+        for (let i = 0; i < 512; i++) {
+          this.p[i] = permutation[i & 255];
+        }
+      },
+      
+      // Simple random number generator
+      random: function() {
+        this.seed = (this.seed * 9301 + 49297) % 233280;
+        return this.seed / 233280;
+      },
+      
+      // 2D noise function
+      simplex2: function(x, y) {
+        // Find unit grid cell containing point
+        const X = Math.floor(x);
+        const Y = Math.floor(y);
+        
+        // Get relative xy coordinates of point within cell
+        x = x - X;
+        y = y - Y;
+        
+        // Wrap cell coordinates
+        const xi = X & 255;
+        const yi = Y & 255;
+        
+        // Calculate noise contributions from corners
+        const n00 = this.gradientDot(this.p[xi + this.p[yi]], x, y);
+        const n01 = this.gradientDot(this.p[xi + this.p[yi + 1]], x, y - 1);
+        const n10 = this.gradientDot(this.p[xi + 1 + this.p[yi]], x - 1, y);
+        const n11 = this.gradientDot(this.p[xi + 1 + this.p[yi + 1]], x - 1, y - 1);
+        
+        // Smoothly interpolate noise values using fade function
+        const u = this.fade(x);
+        const v = this.fade(y);
+        
+        // Interpolate along x
+        const nx0 = this.lerp(n00, n10, u);
+        const nx1 = this.lerp(n01, n11, u);
+        
+        // Interpolate along y
+        return this.lerp(nx0, nx1, v);
+      },
+      
+      // 1D noise function
+      simplex1: function(x) {
+        // Find unit grid interval containing point
+        const X = Math.floor(x);
+        
+        // Get relative x coordinate within interval
+        x = x - X;
+        
+        // Wrap interval
+        const xi = X & 255;
+        
+        // Calculate noise contributions from endpoints
+        const n0 = this.gradientDot1D(this.p[xi], x);
+        const n1 = this.gradientDot1D(this.p[xi + 1], x - 1);
+        
+        // Smoothly interpolate
+        const u = this.fade(x);
+        
+        // Interpolate and return
+        return this.lerp(n0, n1, u);
+      },
+      
+      // Calculate dot product of gradient and distance vectors for 2D
+      gradientDot: function(hash, x, y) {
+        // Choose gradient based on hash
+        const h = hash & 3;
+        const grad = h === 0 ? [1, 1] : h === 1 ? [-1, 1] : h === 2 ? [-1, -1] : [1, -1];
+        
+        // Calculate dot product
+        return grad[0] * x + grad[1] * y;
+      },
+      
+      // Calculate dot product for 1D
+      gradientDot1D: function(hash, x) {
+        // Choose gradient based on hash
+        const h = hash & 1;
+        const grad = h === 0 ? 1 : -1;
+        
+        // Calculate dot product
+        return grad * x;
+      },
+      
+      // Smoothing function (6t^5 - 15t^4 + 10t^3)
+      fade: function(t) {
+        return t * t * t * (t * (t * 6 - 15) + 10);
+      },
+      
+      // Linear interpolation
+      lerp: function(a, b, t) {
+        return a + t * (b - a);
+      }
+    };
+    
+    // Initialize noise generator
+    noiseGenerator.init(Math.random() * 10000);
+    
+    // ============= Main Classes =============
+    
+    /**
+     * Vector2D - Simple 2D vector class for positions and movements
+     */
+    class Vector2D {
+      constructor(x = 0, y = 0) {
+        this.x = x;
+        this.y = y;
+      }
+      
+      add(v) {
+        return new Vector2D(this.x + v.x, this.y + v.y);
+      }
+      
+      subtract(v) {
+        return new Vector2D(this.x - v.x, this.y - v.y);
+      }
+      
+      multiply(scalar) {
+        return new Vector2D(this.x * scalar, this.y * scalar);
+      }
+      
+      divide(scalar) {
+        return scalar !== 0 ? new Vector2D(this.x / scalar, this.y / scalar) : new Vector2D();
+      }
+      
+      magnitude() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
+      }
+      
+      normalize() {
+        const mag = this.magnitude();
+        return mag > 0 ? this.divide(mag) : new Vector2D();
+      }
+      
+      distance(v) {
+        return this.subtract(v).magnitude();
+      }
+      
+      copy() {
+        return new Vector2D(this.x, this.y);
+      }
+      
+      equals(v) {
+        return this.x === v.x && this.y === v.y;
+      }
+      
+      // Get a random vector within bounds
+      static random(xMax, yMax) {
+        return new Vector2D(Math.random() * xMax, Math.random() * yMax);
+      }
+    }
+    
+    /**
+     * Genome - Represents the genetic code of an organism
+     */
+    class Genome {
+      constructor(genes = null) {
+        // Define gene ranges and defaults
+        this.geneDefinitions = {
+          // Movement genes
+          speed: { min: 0.5, max: 6.0, default: 2.0 },
+          turnRate: { min: 0.1, max: 1.0, default: 0.3 },
+          
+          // Physical attributes
+          size: { min: 0.5, max: 3.0, default: 1.0 },
+          color: { min: 0, max: 360, default: 180 }, // Hue value
+          
+          // Sensory abilities
+          visionRange: { min: 20, max: 150, default: 60 },
+          visionAngle: { min: Math.PI/4, max: Math.PI*1.5, default: Math.PI/2 },
+          
+          // Metabolism
+          metabolicRate: { min: 0.2, max: 2.0, default: 1.0 },
+          energyStorage: { min: 50, max: 300, default: 100 },
+          starvationResistance: { min: 0.3, max: 2.0, default: 1.0 }, // NEW: How efficiently organism uses energy
+          
+          // Reproduction
+          reproductionThreshold: { min: 70, max: 200, default: 120 },
+          reproductionCooldown: { min: 10, max: 50, default: 30 },
+          offspringCount: { min: 1, max: 5, default: 2 },
+          mutationRate: { min: 0.01, max: 0.2, default: 0.05 },
+          
+          // Behavior
+          aggressiveness: { min: 0.1, max: 1.0, default: 0.5 },
+          socialFactor: { min: 0.0, max: 1.0, default: 0.3 },
+          
+          // Specialization
+          dietType: { min: 0, max: 1, default: 0.5 }, // 0 = Herbivore, 1 = Carnivore, in-between = omnivore
+          diurnalFactor: { min: 0, max: 1, default: 0.5 }, // 0 = Nocturnal, 1 = Diurnal, in-between = crepuscular
+        };
+        
+        // Initialize the genes
+        this.genes = {};
+        
+        if (genes) {
+          // Copy provided genes
+          for (const [key, value] of Object.entries(genes)) {
+            this.genes[key] = value;
+          }
+        } else {
+          // Create default genes
+          for (const [key, def] of Object.entries(this.geneDefinitions)) {
+            this.genes[key] = def.default;
+          }
+        }
+        
+        // Dominance/recessiveness - each gene has a dominance factor (0-1)
+        this.dominance = {};
+        for (const key of Object.keys(this.geneDefinitions)) {
+          this.dominance[key] = Math.random();
+        }
+        
+        // Gene expressions (phenotype) - what's actually used by the organism
+        this.expressions = {...this.genes};
+        
+        // Genetic lineage ID for tracking evolution
+        this.lineageId = Math.random().toString(36).substr(2, 9);
+        
+        // Parent IDs for phylogenetic tracking
+        this.parentIds = [];
+      }
+      
+      // Create a copy of this genome (for asexual reproduction)
+      clone() {
+        const clonedGenome = new Genome(this.genes);
+        clonedGenome.parentIds = [this.lineageId];
+        return clonedGenome;
+      }
+      
+      // Apply random mutations to the genome
+      mutate(rate, magnitude) {
+        for (const [key, def] of Object.entries(this.geneDefinitions)) {
+          // Check if this gene should mutate based on rate
+          if (Math.random() < rate) {
+            // Calculate mutation amount based on gene range and magnitude
+            const range = def.max - def.min;
+            const change = (Math.random() * 2 - 1) * range * magnitude / 10;
+            
+            // Apply mutation within bounds
+            this.genes[key] = Math.max(def.min, Math.min(def.max, this.genes[key] + change));
+            
+            // Also randomly adjust dominance
+            if (Math.random() < rate) {
+              this.dominance[key] = Math.max(0, Math.min(1, this.dominance[key] + (Math.random() * 0.4 - 0.2)));
+            }
+          }
+        }
+        
+        // Update expressions
+        this.updateExpressions();
+        
+        return this;
+      }
+      
+      // Combine two genomes to create offspring (sexual reproduction)
+      static crossover(genomeA, genomeB) {
+        const childGenes = {};
+        const childGenome = new Genome();
+        
+        // For each gene, select from either parent based on dominance
+        for (const key of Object.keys(childGenome.geneDefinitions)) {
+          // Calculate effective dominance by combining gene value and dominance factor
+          const aDominance = genomeA.genes[key] * genomeA.dominance[key];
+          const bDominance = genomeB.genes[key] * genomeB.dominance[key];
+          
+          // Choose the more dominant gene, or randomly if they're equal
+          if (Math.abs(aDominance - bDominance) < 0.1 || Math.random() < 0.5) {
+            // If they're close in dominance, do a weighted blend
+            const ratio = 0.5 + (Math.random() * 0.5 - 0.25);
+            childGenes[key] = genomeA.genes[key] * ratio + genomeB.genes[key] * (1 - ratio);
+          } else if (aDominance > bDominance) {
+            childGenes[key] = genomeA.genes[key];
+          } else {
+            childGenes[key] = genomeB.genes[key];
+          }
+          
+          // Inherit dominance factors with some blending
+          childGenome.dominance[key] = (genomeA.dominance[key] + genomeB.dominance[key]) / 2;
+          
+          // Small chance to flip dominance pattern entirely
+          if (Math.random() < 0.05) {
+            childGenome.dominance[key] = 1 - childGenome.dominance[key];
+          }
+        }
+        
+        // Set the child's genes and update expressions
+        childGenome.genes = childGenes;
+        childGenome.updateExpressions();
+        
+        // Set parent IDs for phylogeny
+        childGenome.parentIds = [genomeA.lineageId, genomeB.lineageId];
+        
+        return childGenome;
+      }
+      
+      // Update the expressed traits based on genes and dominance
+      updateExpressions() {
+        this.expressions = {...this.genes};
+      }
+      
+      // Calculate genetic distance from another genome (for diversity metrics)
+      geneticDistanceFrom(otherGenome) {
+        let distance = 0;
+        let count = 0;
+        
+        for (const key of Object.keys(this.geneDefinitions)) {
+          const range = this.geneDefinitions[key].max - this.geneDefinitions[key].min;
+          const diff = Math.abs(this.genes[key] - otherGenome.genes[key]) / range;
+          distance += diff;
+          count++;
+        }
+        
+        return count > 0 ? distance / count : 0;
+      }
+      
+      // Calculate fitness value based on gene quality
+      calculateFitness() {
+        // Simple fitness function - optimize for speed, energy storage, and vision
+        // This would be more complex in a real system
+        const speedFitness = this.genes.speed / this.geneDefinitions.speed.max;
+        const energyFitness = this.genes.energyStorage / this.geneDefinitions.energyStorage.max;
+        const visionFitness = this.genes.visionRange / this.geneDefinitions.visionRange.max;
+        
+        return (speedFitness + energyFitness + visionFitness) / 3;
+      }
+    }
+    
+    /**
+     * Organism - Base class for all living entities in the simulation
+     */
+    class Organism {
+      constructor(world, position, genome = null) {
+        this.world = world;
+        this.position = position || new Vector2D(0, 0);
+        this.velocity = new Vector2D(0, 0);
+        this.genome = genome || new Genome();
+        this.energy = this.genome.expressions.energyStorage / 2;
+        this.age = 0;
+        this.alive = true;
+        this.reproductionCooldown = 0;
+        this.id = Math.random().toString(36).substr(2, 9);
+        this.species = 'generic';
+        this.trophicLevel = 0; // 0 = producer, 1 = primary consumer, 2 = secondary consumer
+        this.infected = false;
+        this.diseaseTimer = 0;
+        this.shape = 'circle'; // Default shape
+        this.rotation = Math.random() * Math.PI * 2;
+        this.lifetime = 0;
+        this.generation = 1;
+        this.foodEaten = 0;
+        this.lastReproduced = 0;
+        this.children = [];
+      }
+      
+      // Update organism state for current time step
+      update(deltaTime) {
+        if (!this.alive) return;
+        
+        // Age the organism
+        this.age += deltaTime;
+        this.lifetime += deltaTime;
+        
+        // Decrease reproduction cooldown
+        if (this.reproductionCooldown > 0) {
+          this.reproductionCooldown -= deltaTime;
+        }
+        
+        // Handle disease if infected
+        if (this.infected) {
+          this.handleDisease(deltaTime);
+        }
+        
+        // For plants, use plant starvation rate (handled in Plant class override)
+        // For animals, use the animal starvation rate
+        if (this.species !== 'plant') {
+          // Apply animal starvation rate modifier
+          const animalStarvationRate = this.world.simulationSettings.starvationRate / 100;
+          
+          // Basic metabolic energy consumption - adjusted by starvation resistance and global rate
+          const starvationResistance = this.genome.expressions.starvationResistance || 1.0;
+          this.energy -= (this.genome.expressions.metabolicRate / starvationResistance) * deltaTime * animalStarvationRate;
+        }
+        
+        // Check if the organism has died from starvation
+        if (this.energy <= 0) {
+          this.die("starvation");
+          return;
+        }
+        
+        // Try to reproduce if enough energy
+        this.tryReproduce();
+        
+        // Move organism
+        this.move(deltaTime);
+      }
+      
+      // Move the organism based on its behavior
+      move(deltaTime) {
+        // Override in subclasses
+      }
+      
+      // Render the organism on the canvas
+      render(ctx) {
+        if (!this.alive) return;
+        
+        const size = this.genome.expressions.size * 5;
+        
+        ctx.save();
+        ctx.translate(this.position.x, this.position.y);
+        ctx.rotate(this.rotation);
+        
+        // Draw based on shape
+        if (this.shape === 'circle') {
+          ctx.beginPath();
+          ctx.arc(0, 0, size, 0, Math.PI * 2);
+          ctx.fillStyle = `hsl(${this.genome.expressions.color}, 80%, 50%)`;
+          ctx.fill();
+          
+          // Draw direction indicator
+          ctx.beginPath();
+          ctx.moveTo(size, 0);
+          ctx.lineTo(size - 3, -3);
+          ctx.lineTo(size - 3, 3);
+          ctx.closePath();
+          ctx.fillStyle = 'white';
+          ctx.fill();
+        } else if (this.shape === 'triangle') {
+          ctx.beginPath();
+          ctx.moveTo(size, 0);
+          ctx.lineTo(-size/2, -size/2);
+          ctx.lineTo(-size/2, size/2);
+          ctx.closePath();
+          ctx.fillStyle = `hsl(${this.genome.expressions.color}, 80%, 50%)`;
+          ctx.fill();
+        } else if (this.shape === 'square') {
+          ctx.fillStyle = `hsl(${this.genome.expressions.color}, 80%, 50%)`;
+          ctx.fillRect(-size/2, -size/2, size, size);
+        } else if (this.shape === 'diamond') {
+          ctx.beginPath();
+          ctx.moveTo(size, 0);
+          ctx.lineTo(0, size/2);
+          ctx.lineTo(-size, 0);
+          ctx.lineTo(0, -size/2);
+          ctx.closePath();
+          ctx.fillStyle = `hsl(${this.genome.expressions.color}, 80%, 50%)`;
+          ctx.fill();
+        } else if (this.shape === 'plant') {
+          // Draw plant shape
+          const stemHeight = size * 1.5;
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(0, -stemHeight);
+          ctx.strokeStyle = '#3c8'; 
+          ctx.lineWidth = size / 4;
+          ctx.stroke();
+          
+          // Draw leaves
+          const leafSize = size * 0.8;
+          ctx.fillStyle = `hsl(${this.genome.expressions.color}, 80%, 50%)`;
+          
+          // Draw 3-4 leaves
+          const leafCount = 3 + Math.floor(this.genome.expressions.size);
+          for (let i = 0; i < leafCount; i++) {
+            const angle = (i / leafCount) * Math.PI * 2;
+            const leafX = Math.cos(angle) * leafSize * 0.7;
+            const leafY = -stemHeight * 0.7 + Math.sin(angle) * leafSize * 0.7;
+            
+            ctx.beginPath();
+            ctx.ellipse(leafX, leafY, leafSize/2, leafSize, angle, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+        
+        // If infected, show indicator
+        if (this.infected) {
+          ctx.beginPath();
+          ctx.arc(0, 0, size * 1.3, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+        
+        ctx.restore();
+      }
+      
+      // Try to reproduce if conditions are right
+      tryReproduce() {
+        // Apply global reproduction modifier
+        const reproModifier = this.world.simulationSettings.reproductionModifier / 100;
+        const adjustedThreshold = this.genome.expressions.reproductionThreshold * reproModifier;
+        
+        // Only reproduce if not on cooldown and enough energy
+        if (this.reproductionCooldown <= 0 && 
+            this.energy > adjustedThreshold) {
+          
+          const reproType = this.world.simulationSettings.reproductionType;
+          
+          // Determine if this reproduction is sexual or asexual
+          let isSexual = false;
+          if (reproType === 'sexual') {
+            isSexual = true;
+          } else if (reproType === 'mixed') {
+            isSexual = Math.random() < 0.5;
+          }
+          
+          // For sexual reproduction, find a mate
+          if (isSexual) {
+            this.sexualReproduction();
+          } else {
+            this.asexualReproduction();
+          }
+        }
+      }
+      
+      // Perform asexual reproduction
+      asexualReproduction() {
+        // Create cloned offspring with mutations
+        const offspringCount = Math.floor(this.genome.expressions.offspringCount);
+        const mutationRate = this.genome.expressions.mutationRate * this.world.simulationSettings.mutationRate / 3;
+        const mutationMagnitude = this.world.simulationSettings.mutationMagnitude;
+        
+        for (let i = 0; i < offspringCount; i++) {
+          // Clone genome and apply mutations
+          const childGenome = this.genome.clone().mutate(mutationRate, mutationMagnitude);
+          
+          // Create offspring near parent
+          const offset = new Vector2D(
+            (Math.random() * 20 - 10) * this.genome.expressions.size,
+            (Math.random() * 20 - 10) * this.genome.expressions.size
+          );
+          const childPosition = this.position.add(offset);
+          
+          // Keep within world bounds
+          childPosition.x = Math.max(0, Math.min(this.world.width, childPosition.x));
+          childPosition.y = Math.max(0, Math.min(this.world.height, childPosition.y));
+          
+          // Create the child organism
+          const child = this.createOffspring(childPosition, childGenome);
+          
+          // Set child properties and add to world
+          child.generation = this.generation + 1;
+          this.children.push(child.id);
+          this.world.addOrganism(child);
+        }
+        
+        // Use energy for reproduction and set cooldown
+        this.energy = this.energy * 0.6; // Use 40% of energy for reproduction
+        this.reproductionCooldown = this.genome.expressions.reproductionCooldown;
+        this.lastReproduced = this.world.time;
+      }
+      
+      // Perform sexual reproduction
+      sexualReproduction() {
+        // Apply global reproduction modifier to finding mates
+        const reproModifier = this.world.simulationSettings.reproductionModifier / 100;
+        const adjustedThreshold = this.genome.expressions.reproductionThreshold * reproModifier * 0.7;
+        
+        // Find potential mates of the same species within range
+        const potentialMates = this.world.getOrganismsInRange(
+          this.position, 
+          this.genome.expressions.visionRange, 
+          (org) => {
+            return org !== this && 
+                   org.species === this.species && 
+                   org.alive && 
+                   org.reproductionCooldown <= 0 &&
+                   org.energy > adjustedThreshold;
+          }
+        );
+        
+        if (potentialMates.length > 0) {
+          // Choose a random mate
+          const mate = potentialMates[Math.floor(Math.random() * potentialMates.length)];
+          
+          // Create offspring via genetic crossover
+          const offspringCount = Math.floor((this.genome.expressions.offspringCount + mate.genome.expressions.offspringCount) / 2);
+          const mutationRate = ((this.genome.expressions.mutationRate + mate.genome.expressions.mutationRate) / 2) * 
+                              this.world.simulationSettings.mutationRate / 3;
+          const mutationMagnitude = this.world.simulationSettings.mutationMagnitude;
+          
+          for (let i = 0; i < offspringCount; i++) {
+            // Create crossed genome with mutations
+            const childGenome = Genome.crossover(this.genome, mate.genome).mutate(mutationRate, mutationMagnitude);
+            
+            // Create offspring between parents
+            const midPoint = this.position.add(mate.position).divide(2);
+            const offset = new Vector2D(
+              (Math.random() * 20 - 10),
+              (Math.random() * 20 - 10)
+            );
+            const childPosition = midPoint.add(offset);
+            
+            // Keep within world bounds
+            childPosition.x = Math.max(0, Math.min(this.world.width, childPosition.x));
+            childPosition.y = Math.max(0, Math.min(this.world.height, childPosition.y));
+            
+            // Create the child organism
+            const child = this.createOffspring(childPosition, childGenome);
+            
+            // Set child properties and add to world
+            child.generation = Math.max(this.generation, mate.generation) + 1;
+            this.children.push(child.id);
+            mate.children.push(child.id);
+            this.world.addOrganism(child);
+          }
+          
+          // Use energy for reproduction and set cooldown for both parents
+          this.energy = this.energy * 0.7;
+          mate.energy = mate.energy * 0.7;
+          this.reproductionCooldown = this.genome.expressions.reproductionCooldown;
+          mate.reproductionCooldown = mate.genome.expressions.reproductionCooldown;
+          this.lastReproduced = this.world.time;
+          mate.lastReproduced = this.world.time;
+        }
+      }
+      
+      // Create an offspring organism (override in subclasses)
+      createOffspring(position, genome) {
+        return new Organism(this.world, position, genome);
+      }
+      
+      // Handle disease effects
+      handleDisease(deltaTime) {
+        // Disease effects: energy drain, reduced speed
+        this.energy -= this.genome.expressions.metabolicRate * deltaTime * 0.5;
+        
+        // Progress disease timer
+        this.diseaseTimer -= deltaTime;
+        
+        // Check if disease has run its course
+        if (this.diseaseTimer <= 0) {
+          this.infected = false;
+          this.diseaseTimer = 0;
+        }
+        
+        // Chance to spread disease to nearby organisms
+        if (Math.random() < 0.2 * deltaTime) {
+          const nearbyOrganisms = this.world.getOrganismsInRange(
+            this.position, 
+            this.genome.expressions.size * 10, 
+            (org) => org !== this && org.alive && !org.infected
+          );
+          
+          if (nearbyOrganisms.length > 0) {
+            const targetOrg = nearbyOrganisms[Math.floor(Math.random() * nearbyOrganisms.length)];
+            
+            // Infection chance depends on organism's size (immune system proxy)
+            const infectionChance = 0.3 - (targetOrg.genome.expressions.size * 0.05);
+            
+            if (Math.random() < infectionChance) {
+              targetOrg.infected = true;
+              targetOrg.diseaseTimer = 20 + Math.random() * 30;
+            }
+          }
+        }
+      }
+      
+      // Die and leave remains
+      die(cause = "unknown") {
+        if (!this.alive) return;
+        
+        this.alive = false;
+        
+        // Add nutrients back to the environment
+        this.world.addResources(this.position, this.energy * 0.5, this.genome.expressions.size * 5);
+        
+        // Record death
+        this.world.recordDeath(this, cause);
+      }
+      
+      // Get a serializable object representation
+      serialize() {
+        return {
+          id: this.id,
+          species: this.species,
+          position: { x: this.position.x, y: this.position.y },
+          genome: this.genome.genes,
+          energy: this.energy,
+          age: this.age,
+          alive: this.alive,
+          trophicLevel: this.trophicLevel,
+          generation: this.generation,
+          parentIds: this.genome.parentIds,
+          shape: this.shape
+        };
+      }
+      
+      // Create an organism from serialized data
+      static deserialize(world, data) {
+        const position = new Vector2D(data.position.x, data.position.y);
+        const genome = new Genome(data.genome);
+        
+        let organism;
+        
+        switch (data.species) {
+          case 'plant':
+            organism = new Plant(world, position, genome);
+            break;
+          case 'herbivore':
+            organism = new Herbivore(world, position, genome);
+            break;
+          case 'omnivore':
+            organism = new Omnivore(world, position, genome);
+            break;
+          case 'carnivore':
+            organism = new Carnivore(world, position, genome);
+            break;
+          default:
+            organism = new Organism(world, position, genome);
+        }
+        
+        organism.id = data.id;
+        organism.energy = data.energy;
+        organism.age = data.age;
+        organism.alive = data.alive;
+        organism.trophicLevel = data.trophicLevel;
+        organism.generation = data.generation;
+        organism.genome.parentIds = data.parentIds;
+        organism.shape = data.shape;
+        
+        return organism;
+      }
+    }
+    
+    /**
+     * Plant - Producer organism that converts sunlight to energy
+     */
+    class Plant extends Organism {
+      constructor(world, position, genome = null) {
+        super(world, position, genome);
+        
+        // Set plant-specific properties
+        this.species = 'plant';
+        this.trophicLevel = 0;
+        this.shape = 'plant';
+        this.growthRate = 0.2 + Math.random() * 0.15; // Increased growth rate
+        this.maxSize = 1.0 + Math.random() * 1.5;
+        this.currentSize = 0.4 + Math.random() * 0.3; // Start bigger
+        this.seedRange = 40 + Math.random() * 60; // Increased seed range
+        this.seedingThreshold = 40 + Math.random() * 20; // Lowered threshold
+        this.seedingCooldown = 0;
+        
+        // Set plant-specific genome traits
+        if (!genome) {
+          // Plants have different typical genetics
+          this.genome.genes.speed = 0;
+          this.genome.genes.size = this.maxSize;
+          this.genome.genes.metabolicRate = 0.15 + Math.random() * 0.25; // Lower metabolic rate
+          this.genome.genes.color = 80 + Math.random() * 40; // Green hues
+          this.genome.genes.starvationResistance = 1.2 + Math.random() * 0.8; // Higher resistance
+          this.genome.updateExpressions();
+        }
+      }
+      
+      // Override update method for plant-specific behavior
+      update(deltaTime) {
+        if (!this.alive) return;
+        
+        // Age the plant
+        this.age += deltaTime;
+        
+        // Decrease seeding cooldown
+        if (this.seedingCooldown > 0) {
+          this.seedingCooldown -= deltaTime;
+        }
+        
+        // Get environmental factors
+        const cell = this.world.getTerrainAt(this.position);
+        const environmentFactor = cell ? cell.fertility : 1.0;
+        const timeFactor = this.world.getDayNightFactor();
+        const temperatureFactor = this.world.getTemperatureFactor();
+        const moistureFactor = this.world.getPrecipitationFactor();
+        
+        // Calculate growth factor based on environment
+        const growthFactor = environmentFactor * timeFactor * temperatureFactor * moistureFactor;
+        
+        // Grow and generate energy from sunlight
+        if (growthFactor > 0) {
+          // Grow in size (faster growth)
+          if (this.currentSize < this.maxSize) {
+            this.currentSize += this.growthRate * growthFactor * deltaTime * 0.08; // Increased from 0.05
+            this.currentSize = Math.min(this.currentSize, this.maxSize);
+          }
+          
+          // Generate energy from sunlight (more if grown)
+          const sizeFactor = this.currentSize / this.maxSize;
+          const energyGain = this.genome.expressions.metabolicRate * growthFactor * sizeFactor * deltaTime * 3; // Increased from 2
+          this.energy += energyGain;
+          
+          // Cap energy storage
+          const maxEnergy = this.genome.expressions.energyStorage * sizeFactor;
+          this.energy = Math.min(this.energy, maxEnergy);
+        } else {
+          // Lose energy during night or bad conditions (reduced loss)
+          this.energy -= 0.05 * this.genome.expressions.metabolicRate * deltaTime; // Reduced from 0.1
+        }
+        
+        // Apply plant-specific starvation rate modifier
+        const plantStarvationRate = this.world.simulationSettings.plantStarvationRate / 100;
+        
+        // Basic metabolic energy consumption - adjusted by starvation resistance and plant rate
+        const starvationResistance = this.genome.expressions.starvationResistance || 1.0;
+        this.energy -= (this.genome.expressions.metabolicRate / starvationResistance) * deltaTime * plantStarvationRate * 0.5;
+        
+        // Check for death from starvation
+        if (this.energy <= 0) {
+          this.die("starvation");
+          return;
+        }
+        
+        // Try to seed (plant reproduction) if conditions are right
+        this.trySeeding();
+      }
+      
+      // Try to produce seeds
+      trySeeding() {
+        // Apply global reproduction modifier (reduced effect for plants to help them regrow)
+        const reproModifier = Math.sqrt(this.world.simulationSettings.reproductionModifier / 100);
+        const adjustedThreshold = this.seedingThreshold * reproModifier;
+        
+        // Only seed if not on cooldown, enough energy, and proper size
+        if (this.seedingCooldown <= 0 && 
+            this.energy > adjustedThreshold && 
+            this.currentSize > this.maxSize * 0.6) { // Lowered from 0.7 to 0.6
+          
+          // Create more seeds (increased from 1-3 to 2-5)
+          const seedCount = 2 + Math.floor(Math.random() * 4);
+          
+          for (let i = 0; i < seedCount; i++) {
+            // Clone genome with mutations
+            const childGenome = this.genome.clone().mutate(0.1, this.world.simulationSettings.mutationMagnitude);
+            
+            // Place seed at random distance and direction (increased range)
+            const distance = Math.random() * (this.seedRange * 1.5);
+            const angle = Math.random() * Math.PI * 2;
+            const offset = new Vector2D(
+              Math.cos(angle) * distance,
+              Math.sin(angle) * distance
+            );
+            
+            // Check if the landing spot is viable
+            const seedPosition = this.position.add(offset);
+            
+            // Keep within world bounds
+            seedPosition.x = Math.max(0, Math.min(this.world.width, seedPosition.x));
+            seedPosition.y = Math.max(0, Math.min(this.world.height, seedPosition.y));
+            
+            // Check if terrain is suitable
+            const cell = this.world.getTerrainAt(seedPosition);
+            if (cell && cell.type !== 'water' && cell.type !== 'mountain') {
+              // Decide whether to create an immediate plant or a dormant seed
+              if (Math.random() < 0.7) {
+                // Create the seed (baby plant)
+                const seed = new Plant(this.world, seedPosition, childGenome);
+                seed.energy = this.seedingThreshold * 0.3; // Increased from 0.2 to 0.3
+                seed.currentSize = 0.3; // Increased from 0.2 to 0.3
+                seed.generation = this.generation + 1;
+                this.children.push(seed.id);
+                
+                // Add to world
+                this.world.addOrganism(seed);
+              } else {
+                // Create a dormant seed that will sprout later
+                const dormantTime = 10 + Math.random() * 50; // Sprout after 10-60 time units
+                const seedEnergy = this.seedingThreshold * 0.4; // More energy for dormant seeds
+                
+                this.world.addDormantSeed(
+                  seedPosition,
+                  childGenome,
+                  seedEnergy,
+                  this.generation + 1,
+                  dormantTime
+                );
+                
+                this.children.push('dormant-' + Math.random().toString(36).substr(2, 9));
+              }
+            }
+          }
+          
+          // Use energy for seeding and set cooldown (reduced cooldown)
+          this.energy -= this.seedingThreshold * 0.4; // Reduced from 0.5 to 0.4
+          this.seedingCooldown = 20 + Math.random() * 20; // Reduced from 30-60 to 20-40
+        }
+      }
+      
+      // Override render method for plant appearance
+      render(ctx) {
+        if (!this.alive) return;
+        
+        // Scale size based on plant growth
+        const size = this.currentSize * 5;
+        
+        ctx.save();
+        ctx.translate(this.position.x, this.position.y);
+        
+        // Draw plant with size based on growth
+        // Draw stem
+        const stemHeight = size * 1.5;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -stemHeight);
+        ctx.strokeStyle = '#3c8'; 
+        ctx.lineWidth = size / 4;
+        ctx.stroke();
+        
+        // Draw leaves
+        const leafSize = size * 0.8;
+        ctx.fillStyle = `hsl(${this.genome.expressions.color}, 80%, 50%)`;
+        
+        // Draw 3-4 leaves
+        const leafCount = 3 + Math.floor(this.currentSize * 2);
+        for (let i = 0; i < leafCount; i++) {
+          const angle = (i / leafCount) * Math.PI * 2;
+          const leafX = Math.cos(angle) * leafSize * 0.7;
+          const leafY = -stemHeight * 0.7 + Math.sin(angle) * leafSize * 0.7;
+          
+          ctx.beginPath();
+          ctx.ellipse(leafX, leafY, leafSize/2, leafSize, angle, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        
+        // If infected, show indicator
+        if (this.infected) {
+          ctx.beginPath();
+          ctx.arc(0, 0, size * 1.3, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+        
+        ctx.restore();
+      }
+      
+      // Override createOffspring for plants
+      createOffspring(position, genome) {
+        return new Plant(this.world, position, genome);
+      }
+    }
+    
+    /**
+     * Herbivore - Primary consumer that eats plants
+     */
+    class Herbivore extends Organism {
+      constructor(world, position, genome = null) {
+        super(world, position, genome);
+        
+        // Set herbivore-specific properties
+        this.species = 'herbivore';
+        this.trophicLevel = 1;
+        this.shape = 'circle';
+        this.targetPosition = null;
+        this.huntTimer = 0;
+        this.fleeTimer = 0;
+        this.fleeing = false;
+        
+        // Set herbivore-specific genome traits if new
+        if (!genome) {
+          this.genome.genes.speed = 1.5 + Math.random() * 2.0; // Increased speed range
+          this.genome.genes.size = 0.8 + Math.random() * 0.7;
+          this.genome.genes.visionRange = 60 + Math.random() * 40;
+          this.genome.genes.color = 180 + Math.random() * 60; // Blue/cyan hues
+          this.genome.genes.dietType = 0.2 + Math.random() * 0.3; // Mostly herbivorous
+          this.genome.genes.starvationResistance = 0.5 + Math.random() * 0.5; // Lower efficiency than others
+          this.genome.genes.energyStorage = 70 + Math.random() * 70; // Moderate storage
+          this.genome.updateExpressions();
+        }
+      }
+      
+      // Override update method for herbivore-specific behavior
+      update(deltaTime) {
+        super.update(deltaTime);
+        if (!this.alive) return;
+        
+        // Update timers
+        if (this.huntTimer > 0) this.huntTimer -= deltaTime;
+        if (this.fleeTimer > 0) {
+          this.fleeTimer -= deltaTime;
+        } else {
+          this.fleeing = false;
+        }
+        
+        // Check for nearby predators and flee if needed
+        if (!this.fleeing) {
+          const nearbyPredators = this.world.getOrganismsInRange(
+            this.position,
+            this.genome.expressions.visionRange,
+            (org) => org.alive && org.trophicLevel > this.trophicLevel
+          );
+          
+          if (nearbyPredators.length > 0) {
+            // Find closest predator
+            let closestPredator = nearbyPredators[0];
+            let closestDist = this.position.distance(closestPredator.position);
+            
+            for (let i = 1; i < nearbyPredators.length; i++) {
+              const dist = this.position.distance(nearbyPredators[i].position);
+              if (dist < closestDist) {
+                closestDist = dist;
+                closestPredator = nearbyPredators[i];
+              }
+            }
+            
+            // Flee from predator
+            this.fleeing = true;
+            this.fleeTimer = 5 + Math.random() * 5;
+            
+            // Flee in opposite direction
+            const fleeDirection = this.position.subtract(closestPredator.position).normalize();
+            this.velocity = fleeDirection.multiply(this.genome.expressions.speed * 1.5);
+          }
+        }
+        
+        // Look for food if not fleeing
+        if (!this.fleeing && this.huntTimer <= 0) {
+          // Find nearby plants
+          const nearbyPlants = this.world.getOrganismsInRange(
+            this.position,
+            this.genome.expressions.visionRange,
+            (org) => org.alive && org.species === 'plant'
+          );
+          
+          if (nearbyPlants.length > 0) {
+            // Choose the biggest plant
+            let bestPlant = nearbyPlants[0];
+            let bestSize = bestPlant.currentSize || 0;
+            
+            for (let i = 1; i < nearbyPlants.length; i++) {
+              const size = nearbyPlants[i].currentSize || 0;
+              if (size > bestSize) {
+                bestSize = size;
+                bestPlant = nearbyPlants[i];
+              }
+            }
+            
+            // Set as target
+            this.targetPosition = bestPlant.position.copy();
+            this.huntTimer = 5 + Math.random() * 5;
+          } else {
+            // Wander if no food found
+            this.targetPosition = null;
+            this.huntTimer = 2 + Math.random() * 3;
+          }
+        }
+        
+        // Try to eat nearby plants
+        const eatRange = this.genome.expressions.size * 5;
+        const nearbyFood = this.world.getOrganismsInRange(
+          this.position,
+          eatRange,
+          (org) => org.alive && org.species === 'plant'
+        );
+        
+        if (nearbyFood.length > 0) {
+          // Choose the closest plant
+          let closestPlant = nearbyFood[0];
+          let closestDist = this.position.distance(closestPlant.position);
+          
+          for (let i = 1; i < nearbyFood.length; i++) {
+            const dist = this.position.distance(nearbyFood[i].position);
+            if (dist < closestDist) {
+              closestDist = dist;
+              closestPlant = nearbyFood[i];
+            }
+          }
+          
+          // Eat the plant
+          const energyGained = closestPlant.energy * 0.8;
+          this.energy += energyGained;
+          
+          // Cap energy storage
+          this.energy = Math.min(this.energy, this.genome.expressions.energyStorage);
+          
+          // Record food eaten
+          this.foodEaten++;
+          
+          // Kill the plant
+          closestPlant.die("eaten");
+        }
+      }
+      
+      // Override move method for herbivore movement
+      move(deltaTime) {
+        if (this.fleeing) {
+          // When fleeing, maintain current velocity but adjust for world boundaries
+          const newPosition = this.position.add(this.velocity.multiply(deltaTime));
+          
+          // Check world boundaries
+          const boundsCorrected = this.world.keepInBounds(newPosition);
+          if (!newPosition.equals(boundsCorrected)) {
+            // Hit a boundary, choose a new random direction
+            this.velocity = new Vector2D(
+              (Math.random() * 2 - 1) * this.genome.expressions.speed,
+              (Math.random() * 2 - 1) * this.genome.expressions.speed
+            );
+          }
+          
+          // Update position
+          this.position = boundsCorrected;
+          
+          // Update rotation to match velocity
+          if (this.velocity.magnitude() > 0.01) {
+            this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
+          }
+          
+          return;
+        }
+        
+        // Move toward target if hunting
+        if (this.targetPosition) {
+          const direction = this.targetPosition.subtract(this.position);
+          const distance = direction.magnitude();
+          
+          if (distance > 5) {
+            // Move toward target
+            this.velocity = direction.normalize().multiply(this.genome.expressions.speed);
+          } else {
+            // Reached target, stop
+            this.velocity = new Vector2D(0, 0);
+            this.targetPosition = null;
+          }
+        } else {
+          // Random movement when not targeting
+          if (Math.random() < 0.05) {
+            // Change direction occasionally
+            const angle = Math.random() * Math.PI * 2;
+            this.velocity = new Vector2D(
+              Math.cos(angle) * this.genome.expressions.speed,
+              Math.sin(angle) * this.genome.expressions.speed
+            );
+          }
+          
+          // Slow random drift if not moving much
+          if (this.velocity.magnitude() < 0.5) {
+            this.velocity = new Vector2D(
+              (Math.random() * 2 - 1) * this.genome.expressions.speed * 0.5,
+              (Math.random() * 2 - 1) * this.genome.expressions.speed * 0.5
+            );
+          }
+        }
+        
+        // Apply day/night activity modifier
+        const activityFactor = this.getDayNightActivityFactor();
+        this.velocity = this.velocity.multiply(activityFactor);
+        
+        // Update position
+        const newPosition = this.position.add(this.velocity.multiply(deltaTime));
+        this.position = this.world.keepInBounds(newPosition);
+        
+        // Update rotation to match velocity
+        if (this.velocity.magnitude() > 0.01) {
+          this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
+        }
+      }
+      
+      // Get activity factor based on day/night preference
+      getDayNightActivityFactor() {
+        const timeOfDay = this.world.getDayNightFactor();
+        const preference = this.genome.expressions.diurnalFactor;
+        
+        // Higher activity when time matches preference
+        if (preference > 0.7) {
+          // Diurnal - active during day
+          return 0.5 + timeOfDay * 0.5;
+        } else if (preference < 0.3) {
+          // Nocturnal - active during night
+          return 1.0 - timeOfDay * 0.5;
+        } else {
+          // Crepuscular - active at dawn/dusk
+          return 0.7 + Math.abs(timeOfDay - 0.5) * 0.6;
+        }
+      }
+      
+      // Override createOffspring for herbivores
+      createOffspring(position, genome) {
+        return new Herbivore(this.world, position, genome);
+      }
+    }
+
+    /**
+     * Omnivore - Consumer that eats both plants and other consumers
+     */
+    class Omnivore extends Organism {
+      constructor(world, position, genome = null) {
+        super(world, position, genome);
+        
+        // Set omnivore-specific properties
+        this.species = 'omnivore';
+        this.trophicLevel = 1.5; // Between herbivore and carnivore
+        this.shape = 'diamond';
+        this.targetPrey = null;
+        this.targetPlant = null;
+        this.huntTimer = 0;
+        this.fleeTimer = 0;
+        this.fleeing = false;
+        this.attackCooldown = 0;
+        this.plantPreference = world.simulationSettings.omnivorePreference / 100;
+        
+        // Set omnivore-specific genome traits if new
+        if (!genome) {
+          this.genome.genes.speed = 1.8 + Math.random() * 1.8; // Increased variability
+          this.genome.genes.size = 1.0 + Math.random() * 0.8;
+          this.genome.genes.visionRange = 70 + Math.random() * 40;
+          this.genome.genes.color = 60 + Math.random() * 80; // Yellow/orange hues
+          this.genome.genes.dietType = 0.4 + Math.random() * 0.3; // Omnivorous
+          this.genome.genes.aggressiveness = 0.3 + Math.random() * 0.5;
+          this.genome.genes.starvationResistance = 0.7 + Math.random() * 0.6; // Moderate efficiency
+          this.genome.genes.energyStorage = 80 + Math.random() * 80; // Moderate storage
+          this.genome.updateExpressions();
+        }
+        
+        // Adapt plant preference based on genome's dietType
+        this.adaptivePlantPreference = this.genome.expressions.dietType < 0.5 
+            ? 0.7 - this.genome.expressions.dietType // More herbivorous
+            : 0.3 - (this.genome.expressions.dietType - 0.5) * 0.6; // More carnivorous
+        
+        // Blend with world settings
+        this.plantPreference = (this.adaptivePlantPreference + this.plantPreference) / 2;
+      }
+      
+      // Override update method for omnivore-specific behavior
+      update(deltaTime) {
+        super.update(deltaTime);
+        if (!this.alive) return;
+        
+        // Update timers
+        if (this.huntTimer > 0) this.huntTimer -= deltaTime;
+        if (this.fleeTimer > 0) {
+          this.fleeTimer -= deltaTime;
+        } else {
+          this.fleeing = false;
+        }
+        if (this.attackCooldown > 0) this.attackCooldown -= deltaTime;
+        
+        // Check for nearby predators and flee if needed
+        if (!this.fleeing) {
+          const nearbyPredators = this.world.getOrganismsInRange(
+            this.position,
+            this.genome.expressions.visionRange,
+            (org) => org.alive && org.trophicLevel > this.trophicLevel
+          );
+          
+          if (nearbyPredators.length > 0) {
+            // Find closest predator
+            let closestPredator = nearbyPredators[0];
+            let closestDist = this.position.distance(closestPredator.position);
+            
+            for (let i = 1; i < nearbyPredators.length; i++) {
+              const dist = this.position.distance(nearbyPredators[i].position);
+              if (dist < closestDist) {
+                closestDist = dist;
+                closestPredator = nearbyPredators[i];
+              }
+            }
+            
+            // Flee from predator if it's bigger or you're low on energy
+            if (closestPredator.genome.expressions.size > this.genome.expressions.size * 1.2 || 
+                this.energy < this.genome.expressions.energyStorage * 0.3) {
+              this.fleeing = true;
+              this.fleeTimer = 5 + Math.random() * 5;
+              
+              // Flee in opposite direction
+              const fleeDirection = this.position.subtract(closestPredator.position).normalize();
+              this.velocity = fleeDirection.multiply(this.genome.expressions.speed * 1.5);
+            }
+          }
+        }
+        
+        // Look for food if not fleeing
+        if (!this.fleeing && this.huntTimer <= 0) {
+          // Decide whether to hunt prey or look for plants based on plant preference
+          if (Math.random() < this.plantPreference) {
+            // Look for plants
+            this.lookForPlants();
+          } else {
+            // Look for prey
+            this.lookForPrey();
+          }
+        }
+        
+        // Try to eat nearby food
+        this.tryToEat(deltaTime);
+      }
+      
+      // Look for plants to eat
+      lookForPlants() {
+        const nearbyPlants = this.world.getOrganismsInRange(
+          this.position,
+          this.genome.expressions.visionRange,
+          (org) => org.alive && org.species === 'plant'
+        );
+        
+        if (nearbyPlants.length > 0) {
+          // Choose the biggest plant
+          let bestPlant = nearbyPlants[0];
+          let bestSize = bestPlant.currentSize || 0;
+          
+          for (let i = 1; i < nearbyPlants.length; i++) {
+            const size = nearbyPlants[i].currentSize || 0;
+            if (size > bestSize) {
+              bestSize = size;
+              bestPlant = nearbyPlants[i];
+            }
+          }
+          
+          // Set as target
+          this.targetPlant = bestPlant;
+          this.targetPrey = null;
+          this.huntTimer = 5 + Math.random() * 5;
+        } else {
+          // No plants found, try looking for prey instead
+          this.lookForPrey();
+        }
+      }
+      
+      // Look for prey to hunt
+      lookForPrey() {
+        const nearbyPrey = this.world.getOrganismsInRange(
+          this.position,
+          this.genome.expressions.visionRange,
+          (org) => org.alive && org.trophicLevel < this.trophicLevel && 
+                  org.species !== 'plant' && // Skip plants when looking for prey
+                  org.genome.expressions.size < this.genome.expressions.size * 1.2 // Only hunt smaller or similar-sized prey
+        );
+        
+        if (nearbyPrey.length > 0) {
+          // Choose the closest prey
+          let closestPrey = nearbyPrey[0];
+          let closestDist = this.position.distance(closestPrey.position);
+          
+          for (let i = 1; i < nearbyPrey.length; i++) {
+            const dist = this.position.distance(nearbyPrey[i].position);
+            if (dist < closestDist) {
+              closestDist = dist;
+              closestPrey = nearbyPrey[i];
+            }
+          }
+          
+          // Set as target
+          this.targetPrey = closestPrey;
+          this.targetPlant = null;
+          this.huntTimer = 8 + Math.random() * 5;
+        } else {
+          // No prey found, wander or try plants
+          if (Math.random() < this.plantPreference * 1.5) {
+            this.lookForPlants();
+          } else {
+            this.targetPrey = null;
+            this.targetPlant = null;
+            this.huntTimer = 2 + Math.random() * 3;
+          }
+        }
+      }
+      
+      // Try to eat nearby food
+      tryToEat(deltaTime) {
+        const eatRange = this.genome.expressions.size * 5;
+        
+        // First check for plants (easier food source)
+        const nearbyPlants = this.world.getOrganismsInRange(
+          this.position,
+          eatRange,
+          (org) => org.alive && org.species === 'plant'
+        );
+        
+        if (nearbyPlants.length > 0 && (Math.random() < this.plantPreference || this.energy < this.genome.expressions.energyStorage * 0.4)) {
+          // Choose the closest plant
+          let closestPlant = nearbyPlants[0];
+          let closestDist = this.position.distance(closestPlant.position);
+          
+          for (let i = 1; i < nearbyPlants.length; i++) {
+            const dist = this.position.distance(nearbyPlants[i].position);
+            if (dist < closestDist) {
+              closestDist = dist;
+              closestPlant = nearbyPlants[i];
+            }
+          }
+          
+          // Eat the plant
+          const energyGained = closestPlant.energy * 0.7; // Slightly less efficient than herbivores
+          this.energy += energyGained;
+          
+          // Cap energy storage
+          this.energy = Math.min(this.energy, this.genome.expressions.energyStorage);
+          
+          // Record food eaten
+          this.foodEaten++;
+          
+          // Kill the plant
+          closestPlant.die("eaten");
+          
+          // Reset hunt timer
+          this.huntTimer = 3 + Math.random() * 3;
+          
+          return; // Skip prey check if plant was eaten
+        }
+        
+        // Then check for prey if hunger is high or carnivore tendency is strong
+        if (this.attackCooldown <= 0 && (this.energy < this.genome.expressions.energyStorage * 0.7 || Math.random() > this.plantPreference)) {
+          const nearbyPrey = this.world.getOrganismsInRange(
+            this.position,
+            eatRange,
+            (org) => org.alive && org.trophicLevel < this.trophicLevel && 
+                     org.species !== 'plant' && // Skip plants when attacking
+                     org.genome.expressions.size < this.genome.expressions.size * 1.2 // Only attack smaller prey
+          );
+          
+          if (nearbyPrey.length > 0) {
+            // Choose the closest prey
+            let closestPrey = nearbyPrey[0];
+            let closestDist = this.position.distance(closestPrey.position);
+            
+            for (let i = 1; i < nearbyPrey.length; i++) {
+              const dist = this.position.distance(nearbyPrey[i].position);
+              if (dist < closestDist) {
+                closestDist = dist;
+                closestPrey = nearbyPrey[i];
+              }
+            }
+            
+            // Attack the prey
+            const damage = this.genome.expressions.size * 2 * this.genome.expressions.aggressiveness;
+            closestPrey.energy -= damage;
+            
+            // Check if prey is killed
+            if (closestPrey.energy <= 0) {
+              // Gain energy from prey
+              const energyGained = closestPrey.genome.expressions.size * 15;
+              this.energy += energyGained;
+              
+              // Cap energy storage
+              this.energy = Math.min(this.energy, this.genome.expressions.energyStorage);
+              
+              // Record kill
+              this.foodEaten++;
+              
+              // Kill the prey
+              closestPrey.die("predation");
+            }
+            
+            // Set attack cooldown
+            this.attackCooldown = 2 + Math.random();
+            
+            // Reset hunt timer
+            this.huntTimer = 5 + Math.random() * 5;
+          }
+        }
+      }
+      
+      // Override move method for omnivore movement
+      move(deltaTime) {
+        if (this.fleeing) {
+          // When fleeing, maintain current velocity but adjust for world boundaries
+          const newPosition = this.position.add(this.velocity.multiply(deltaTime));
+          
+          // Check world boundaries
+          const boundsCorrected = this.world.keepInBounds(newPosition);
+          if (!newPosition.equals(boundsCorrected)) {
+            // Hit a boundary, choose a new random direction
+            this.velocity = new Vector2D(
+              (Math.random() * 2 - 1) * this.genome.expressions.speed,
+              (Math.random() * 2 - 1) * this.genome.expressions.speed
+            );
+          }
+          
+          // Update position
+          this.position = boundsCorrected;
+          
+          // Update rotation to match velocity
+          if (this.velocity.magnitude() > 0.01) {
+            this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
+          }
+          
+          return;
+        }
+        
+        let targetPosition = null;
+        
+        // Move toward target if hunting
+        if (this.targetPrey && this.targetPrey.alive) {
+          targetPosition = this.targetPrey.position;
+        } else if (this.targetPlant && this.targetPlant.alive) {
+          targetPosition = this.targetPlant.position;
+        }
+        
+        if (targetPosition) {
+          const direction = targetPosition.subtract(this.position);
+          const distance = direction.magnitude();
+          
+          if (distance > 5) {
+            // Move toward target
+            this.velocity = direction.normalize().multiply(this.genome.expressions.speed);
+          } else {
+            // Reached target, stop
+            this.velocity = new Vector2D(0, 0);
+            this.targetPrey = null;
+            this.targetPlant = null;
+          }
+        } else {
+          // Random movement when not targeting
+          if (Math.random() < 0.05) {
+            // Change direction occasionally
+            const angle = Math.random() * Math.PI * 2;
+            this.velocity = new Vector2D(
+              Math.cos(angle) * this.genome.expressions.speed,
+              Math.sin(angle) * this.genome.expressions.speed
+            );
+          }
+          
+          // Slow random drift if not moving much
+          if (this.velocity.magnitude() < 0.5) {
+            this.velocity = new Vector2D(
+              (Math.random() * 2 - 1) * this.genome.expressions.speed * 0.5,
+              (Math.random() * 2 - 1) * this.genome.expressions.speed * 0.5
+            );
+          }
+        }
+        
+        // Apply day/night activity modifier
+        const activityFactor = this.getDayNightActivityFactor();
+        this.velocity = this.velocity.multiply(activityFactor);
+        
+        // Update position
+        const newPosition = this.position.add(this.velocity.multiply(deltaTime));
+        this.position = this.world.keepInBounds(newPosition);
+        
+        // Update rotation to match velocity
+        if (this.velocity.magnitude() > 0.01) {
+          this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
+        }
+      }
+      
+      // Get activity factor based on day/night preference
+      getDayNightActivityFactor() {
+        const timeOfDay = this.world.getDayNightFactor();
+        const preference = this.genome.expressions.diurnalFactor;
+        
+        // Higher activity when time matches preference
+        if (preference > 0.7) {
+          // Diurnal - active during day
+          return 0.5 + timeOfDay * 0.5;
+        } else if (preference < 0.3) {
+          // Nocturnal - active during night
+          return 1.0 - timeOfDay * 0.5;
+        } else {
+          // Crepuscular - active at dawn/dusk
+          return 0.7 + Math.abs(timeOfDay - 0.5) * 0.6;
+        }
+      }
+      
+      // Override createOffspring for omnivores
+      createOffspring(position, genome) {
+        return new Omnivore(this.world, position, genome);
+      }
+    }
+    
+    /**
+     * Carnivore - Secondary consumer that eats herbivores
+     */
+    class Carnivore extends Organism {
+      constructor(world, position, genome = null) {
+        super(world, position, genome);
+        
+        // Set carnivore-specific properties
+        this.species = 'carnivore';
+        this.trophicLevel = 2;
+        this.shape = 'triangle';
+        this.targetPrey = null;
+        this.huntTimer = 0;
+        this.attackCooldown = 0;
+        this.packmates = [];
+        
+        // Set carnivore-specific genome traits if new
+        if (!genome) {
+          this.genome.genes.speed = 2.0 + Math.random() * 3.0; // Higher speed range
+          this.genome.genes.size = 1.0 + Math.random() * 1.0;
+          this.genome.genes.visionRange = 80 + Math.random() * 50;
+          this.genome.genes.color = 0 + Math.random() * 30; // Red hues
+          this.genome.genes.aggressiveness = 0.6 + Math.random() * 0.4;
+          this.genome.genes.dietType = 0.7 + Math.random() * 0.3; // Mostly carnivorous
+          this.genome.genes.starvationResistance = 1.0 + Math.random() * 0.8; // More efficient than other species
+          this.genome.genes.energyStorage = 100 + Math.random() * 100; // Higher energy storage capacity
+          this.genome.updateExpressions();
+        }
+      }
+      
+      // Override update method for carnivore-specific behavior
+      update(deltaTime) {
+        super.update(deltaTime);
+        if (!this.alive) return;
+        
+        // Update timers
+        if (this.huntTimer > 0) this.huntTimer -= deltaTime;
+        if (this.attackCooldown > 0) this.attackCooldown -= deltaTime;
+        
+        // Look for prey if not currently hunting
+        if (this.huntTimer <= 0 || !this.targetPrey || !this.targetPrey.alive) {
+          this.targetPrey = null;
+          
+          // Find nearby prey
+          const nearbyPrey = this.world.getOrganismsInRange(
+            this.position,
+            this.genome.expressions.visionRange,
+            (org) => org.alive && org.trophicLevel < this.trophicLevel && org.trophicLevel > 0
+          );
+          
+          if (nearbyPrey.length > 0) {
+            // Choose the closest prey with the highest energy/size ratio
+            let bestPrey = null;
+            let bestScore = -Infinity;
+            
+            for (const prey of nearbyPrey) {
+              // Calculate prey desirability based on distance, energy, and size
+              const distance = this.position.distance(prey.position);
+              const energyRatio = prey.energy / (prey.genome.expressions.size + 0.1);
+              const score = energyRatio / (distance + 1);
+              
+              if (score > bestScore) {
+                bestScore = score;
+                bestPrey = prey;
+              }
+            }
+            
+            if (bestPrey) {
+              // Set as target
+              this.targetPrey = bestPrey;
+              this.huntTimer = 10 + Math.random() * 5;
+            }
+          } else {
+            // No prey found, wander
+            this.huntTimer = 3 + Math.random() * 2;
+          }
+        }
+        
+        // Try to find packmates if social
+        if (this.genome.expressions.socialFactor > 0.5 && Math.random() < 0.1) {
+          const nearbyPackmates = this.world.getOrganismsInRange(
+            this.position,
+            this.genome.expressions.visionRange * 1.5,
+            (org) => org !== this && org.alive && org.species === this.species
+          );
+          
+          this.packmates = nearbyPackmates.slice(0, 3); // Remember up to 3 packmates
+        }
+        
+        // Try to attack prey
+        if (this.targetPrey && this.attackCooldown <= 0) {
+          const attackRange = this.genome.expressions.size * 6;
+          const distToPrey = this.position.distance(this.targetPrey.position);
+          
+          if (distToPrey < attackRange) {
+            // Attack the prey
+            const damage = this.genome.expressions.size * 3 * this.genome.expressions.aggressiveness;
+            this.targetPrey.energy -= damage;
+            
+            // Check if prey is killed
+            if (this.targetPrey.energy <= 0) {
+              // Gain energy from prey
+              const energyGained = this.targetPrey.genome.expressions.size * 20;
+              this.energy += energyGained;
+              
+              // Cap energy storage
+              this.energy = Math.min(this.energy, this.genome.expressions.energyStorage);
+              
+              // Record kill
+              this.foodEaten++;
+              
+              // Kill the prey
+              this.targetPrey.die("predation");
+              this.targetPrey = null;
+            }
+            
+            // Set attack cooldown
+            this.attackCooldown = 1 + Math.random();
+          }
+        }
+      }
+      
+      // Override move method for carnivore movement
+      move(deltaTime) {
+        // Hunt prey if targeted
+        if (this.targetPrey && this.targetPrey.alive) {
+          let targetPosition;
+          
+          // If hunting in a pack, use pack tactics
+          if (this.packmates.length > 0 && Math.random() < this.genome.expressions.socialFactor) {
+            // Try to flank the prey by predicting its movement
+            const preyVelocity = this.targetPrey.velocity || new Vector2D(0, 0);
+            const predictedPosition = this.targetPrey.position.add(preyVelocity.multiply(2));
+            
+            // Choose a flanking position
+            const flankAngle = Math.random() * Math.PI - Math.PI/2; // -π/2 to π/2
+            const flankDirection = new Vector2D(
+              Math.cos(flankAngle),
+              Math.sin(flankAngle)
+            );
+            const flankDistance = this.targetPrey.genome.expressions.size * 10;
+            
+            targetPosition = predictedPosition.add(flankDirection.multiply(flankDistance));
+          } else {
+            // Direct pursuit
+            targetPosition = this.targetPrey.position.copy();
+          }
+          
+          // Calculate direction to target
+          const direction = targetPosition.subtract(this.position);
+          const distance = direction.magnitude();
+          
+          if (distance > 1) {
+            // Move toward target with speed based on distance - faster pursuit
+            // Removed slowdown to make carnivore movement more effective
+            this.velocity = direction.normalize().multiply(this.genome.expressions.speed * 1.2);
+          } else {
+            // Reached target, stop
+            this.velocity = new Vector2D(0, 0);
+          }
+        } else {
+          // Random movement when not targeting prey - more purposeful
+          if (Math.random() < 0.03) {
+            // Change direction occasionally with higher speed
+            const angle = Math.random() * Math.PI * 2;
+            this.velocity = new Vector2D(
+              Math.cos(angle) * this.genome.expressions.speed * 0.8, // Increased from 0.7
+              Math.sin(angle) * this.genome.expressions.speed * 0.8  // Increased from 0.7
+            );
+          }
+          
+          // If part of a pack, stay near packmates
+          if (this.packmates.length > 0 && Math.random() < this.genome.expressions.socialFactor) {
+            // Calculate average position of packmates
+            let avgPos = new Vector2D(0, 0);
+            for (const packmate of this.packmates) {
+              avgPos = avgPos.add(packmate.position);
+            }
+            avgPos = avgPos.divide(this.packmates.length);
+            
+            // Move toward packmates if too far
+            const distToPackmates = this.position.distance(avgPos);
+            if (distToPackmates > this.genome.expressions.visionRange * 0.7) {
+              const packDirection = avgPos.subtract(this.position).normalize();
+              this.velocity = this.velocity.add(packDirection.multiply(this.genome.expressions.speed * 0.3));
+            }
+          }
+        }
+        
+        // Apply day/night activity modifier
+        const activityFactor = this.getDayNightActivityFactor();
+        this.velocity = this.velocity.multiply(activityFactor);
+        
+        // Limit maximum speed - higher limit for carnivores
+        const speedLimit = this.genome.expressions.speed * 1.5; // Increased from 1.2
+        const currentSpeed = this.velocity.magnitude();
+        if (currentSpeed > speedLimit) {
+          this.velocity = this.velocity.normalize().multiply(speedLimit);
+        } else if (currentSpeed < 0.1 && this.targetPrey) {
+          // Ensure minimum speed during pursuit
+          this.velocity = this.velocity.normalize().multiply(this.genome.expressions.speed * 0.5);
+        }
+        
+        // Update position
+        const newPosition = this.position.add(this.velocity.multiply(deltaTime));
+        this.position = this.world.keepInBounds(newPosition);
+        
+        // Update rotation to match velocity
+        if (this.velocity.magnitude() > 0.01) {
+          this.rotation = Math.atan2(this.velocity.y, this.velocity.x);
+        }
+      }
+      
+      // Get activity factor based on day/night preference
+      getDayNightActivityFactor() {
+        const timeOfDay = this.world.getDayNightFactor();
+        const preference = this.genome.expressions.diurnalFactor;
+        
+        // Higher activity when time matches preference
+        if (preference > 0.7) {
+          // Diurnal - active during day
+          return 0.5 + timeOfDay * 0.5;
+        } else if (preference < 0.3) {
+          // Nocturnal - active during night
+          return 1.0 - timeOfDay * 0.5;
+        } else {
+          // Crepuscular - active at dawn/dusk
+          return 0.7 + Math.abs(timeOfDay - 0.5) * 0.6;
+        }
+      }
+      
+      // Override render to show pack connections
+      render(ctx) {
+        super.render(ctx);
+        
+        // Draw pack connections if part of a pack
+        if (this.packmates.length > 0 && this.genome.expressions.socialFactor > 0.5) {
+          ctx.beginPath();
+          for (const packmate of this.packmates) {
+            if (packmate.alive) {
+              ctx.moveTo(this.position.x, this.position.y);
+              ctx.lineTo(packmate.position.x, packmate.position.y);
+            }
+          }
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+      
+      // Override createOffspring for carnivores
+      createOffspring(position, genome) {
+        return new Carnivore(this.world, position, genome);
+      }
+    }
+    
+    /**
+     * Environment - Manages the world's physical properties and terrain
+     */
+    class Environment {
+      constructor(width, height, complexityLevel = 5) {
+        this.width = width;
+        this.height = height;
+        this.complexityLevel = complexityLevel;
+        
+        // Terrain grid
+        this.terrainSize = 20; // Size of terrain cells
+        this.terrainGrid = [];
+        
+        // Resource distribution
+        this.resourceMap = [];
+        this.resourceMapResolution = 10;
+        
+        // Climate system
+        this.temperature = 20; // Celsius
+        this.precipitation = 50; // Percentage
+        this.temperatureRange = [-10, 40];
+        this.precipitationRange = [0, 100];
+        this.seasonalOffset = 0;
+        this.weatherVariability = 0.1;
+        this.temperatureOffset = 0;
+        
+        // Time system
+        this.time = 0;
+        this.dayLength = 100; // Time units per day
+        this.yearLength = 400; // Time units per year
+        this.seasonNames = ['Winter', 'Spring', 'Summer', 'Autumn'];
+        
+        // Initialize terrain and resources
+        this.generateTerrain();
+        this.initializeResources();
+      }
+      
+      // Generate terrain with varying features
+      generateTerrain() {
+        const gridWidth = Math.ceil(this.width / this.terrainSize);
+        const gridHeight = Math.ceil(this.height / this.terrainSize);
+        
+        // Initialize terrain grid
+        this.terrainGrid = new Array(gridHeight);
+        for (let y = 0; y < gridHeight; y++) {
+          this.terrainGrid[y] = new Array(gridWidth);
+        }
+        
+        // Use noise to generate terrain features
+        const noiseScale = 0.005 + (this.complexityLevel * 0.002);
+        
+        // Generate base terrain types
+        for (let y = 0; y < gridHeight; y++) {
+          for (let x = 0; x < gridWidth; x++) {
+            // Generate noise values for different features
+            const baseNoise = noiseGenerator.simplex2(x * noiseScale, y * noiseScale);
+            const elevationNoise = noiseGenerator.simplex2(x * noiseScale * 2, y * noiseScale * 2);
+            const moistureNoise = noiseGenerator.simplex2(x * noiseScale * 1.5, y * noiseScale * 1.5 + 100);
+            
+            // Calculate base elevation
+            const elevation = (elevationNoise + 1) / 2;
+            
+            // Calculate moisture level
+            const moisture = (moistureNoise + 1) / 2;
+            
+            // Determine terrain type
+            let type, color, fertility, movementCost;
+            
+            if (elevation > 0.75) {
+              // Mountains
+              type = 'mountain';
+              color = `rgb(100, ${80 + elevation * 40}, ${80 + elevation * 40})`;
+              fertility = 0.2;
+              movementCost = 3.0;
+            } else if (elevation < 0.35 && moisture > 0.4) {
+              // Water
+              type = 'water';
+              const waterDepth = 150 + (0.35 - elevation) * 200;
+              color = `rgb(0, ${waterDepth}, 255)`;
+              fertility = 0.3;
+              movementCost = 2.5;
+            } else if (moisture > 0.65) {
+              // Forest
+              type = 'forest';
+              color = `rgb(0, ${100 + moisture * 50}, 0)`;
+              fertility = 0.9;
+              movementCost = 1.5;
+            } else if (moisture > 0.4) {
+              // Grassland
+              type = 'grassland';
+              color = `rgb(${100 + (1-moisture) * 50}, ${150 + moisture * 50}, 0)`;
+              fertility = 1.0;
+              movementCost = 1.0;
+            } else {
+              // Desert
+              type = 'desert';
+              color = `rgb(${200 + moisture * 55}, ${180 + moisture * 75}, 100)`;
+              fertility = 0.4;
+              movementCost = 1.2;
+            }
+            
+            // Store terrain data
+            this.terrainGrid[y][x] = {
+              type,
+              color,
+              elevation,
+              moisture,
+              fertility,
+              movementCost,
+              resources: 0,
+              x: x * this.terrainSize,
+              y: y * this.terrainSize,
+              width: this.terrainSize,
+              height: this.terrainSize
+            };
+          }
+        }
+        
+        // Add random features based on complexity level
+        this.addRandomFeatures();
+      }
+      
+      // Add random terrain features for variety
+      addRandomFeatures() {
+        const gridWidth = this.terrainGrid[0].length;
+        const gridHeight = this.terrainGrid.length;
+        const featureCount = Math.floor(this.complexityLevel * 2);
+        
+        // Add rivers
+        for (let i = 0; i < Math.min(featureCount, 3); i++) {
+          // Start from a random point at the top
+          let x = Math.floor(Math.random() * gridWidth);
+          let y = 0;
+          
+          // Flow downward with some randomness
+          while (y < gridHeight - 1) {
+            // Mark as water
+            if (this.terrainGrid[y][x]) {
+              this.terrainGrid[y][x].type = 'water';
+              this.terrainGrid[y][x].color = 'rgb(0, 150, 255)';
+              this.terrainGrid[y][x].fertility = 0.8;
+              this.terrainGrid[y][x].movementCost = 2.0;
+            }
+            
+            // Move down
+            y++;
+            
+            // Sometimes move sideways
+            if (Math.random() < 0.7) {
+              x += Math.floor(Math.random() * 3) - 1;
+              x = Math.max(0, Math.min(gridWidth - 1, x));
+            }
+            
+            // Widen the river slightly
+            if (Math.random() < 0.3) {
+              const xOffset = Math.floor(Math.random() * 3) - 1;
+              const neighborX = Math.max(0, Math.min(gridWidth - 1, x + xOffset));
+              
+              if (this.terrainGrid[y][neighborX]) {
+                this.terrainGrid[y][neighborX].type = 'water';
+                this.terrainGrid[y][neighborX].color = 'rgb(0, 150, 255)';
+                this.terrainGrid[y][neighborX].fertility = 0.8;
+                this.terrainGrid[y][neighborX].movementCost = 2.0;
+              }
+            }
+          }
+        }
+        
+        // Add mountain ranges
+        for (let i = 0; i < Math.floor(featureCount / 2); i++) {
+          // Start from a random point
+          let x = Math.floor(Math.random() * gridWidth);
+          let y = Math.floor(Math.random() * gridHeight);
+          const length = 5 + Math.floor(Math.random() * 10);
+          const direction = Math.random() * Math.PI * 2;
+          
+          // Create mountain range
+          for (let j = 0; j < length; j++) {
+            const rangeX = Math.floor(x + Math.cos(direction) * j);
+            const rangeY = Math.floor(y + Math.sin(direction) * j);
+            
+            if (rangeX >= 0 && rangeX < gridWidth && rangeY >= 0 && rangeY < gridHeight) {
+              // Mark as mountain
+              this.terrainGrid[rangeY][rangeX].type = 'mountain';
+              this.terrainGrid[rangeY][rangeX].color = 'rgb(120, 120, 120)';
+              this.terrainGrid[rangeY][rangeX].fertility = 0.2;
+              this.terrainGrid[rangeY][rangeX].movementCost = 3.0;
+              
+              // Add some surrounding foothills
+              for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                  const hillX = rangeX + dx;
+                  const hillY = rangeY + dy;
+                  
+                  if (hillX >= 0 && hillX < gridWidth && hillY >= 0 && hillY < gridHeight &&
+                      Math.random() < 0.5 && 
+                      this.terrainGrid[hillY][hillX].type !== 'mountain') {
+                    this.terrainGrid[hillY][hillX].type = 'hills';
+                    this.terrainGrid[hillY][hillX].color = 'rgb(140, 140, 100)';
+                    this.terrainGrid[hillY][hillX].fertility = 0.5;
+                    this.terrainGrid[hillY][hillX].movementCost = 1.8;
+                  }
+                }
+              }
+            }
+          }
+        }
+        
+        // Add random borders/barriers
+        const barrierCount = Math.floor(this.complexityLevel / 2);
+        for (let i = 0; i < barrierCount; i++) {
+          // Choose a random starting point
+          const startX = Math.floor(Math.random() * gridWidth);
+          const startY = Math.floor(Math.random() * gridHeight);
+          const length = 5 + Math.floor(Math.random() * 15);
+          const direction = Math.random() * Math.PI * 2;
+          
+          // Create barrier
+          for (let j = 0; j < length; j++) {
+            const barrierX = Math.floor(startX + Math.cos(direction) * j);
+            const barrierY = Math.floor(startY + Math.sin(direction) * j);
+            
+            if (barrierX >= 0 && barrierX < gridWidth && barrierY >= 0 && barrierY < gridHeight) {
+              // Make this cell a barrier (could be mountain, water, or wall)
+              const barrierType = Math.random();
+              
+              if (barrierType < 0.4) {
+                this.terrainGrid[barrierY][barrierX].type = 'mountain';
+                this.terrainGrid[barrierY][barrierX].color = 'rgb(120, 120, 120)';
+              } else if (barrierType < 0.8) {
+                this.terrainGrid[barrierY][barrierX].type = 'water';
+                this.terrainGrid[barrierY][barrierX].color = 'rgb(0, 150, 255)';
+              } else {
+                this.terrainGrid[barrierY][barrierX].type = 'wall';
+                this.terrainGrid[barrierY][barrierX].color = 'rgb(80, 80, 80)';
+              }
+              
+              this.terrainGrid[barrierY][barrierX].fertility = 0.1;
+              this.terrainGrid[barrierY][barrierX].movementCost = 10.0;
+            }
+          }
+        }
+      }
+      
+      // Initialize resource distribution
+      initializeResources() {
+        const mapWidth = Math.ceil(this.width / this.resourceMapResolution);
+        const mapHeight = Math.ceil(this.height / this.resourceMapResolution);
+        
+        // Initialize resource grid
+        this.resourceMap = new Array(mapHeight);
+        for (let y = 0; y < mapHeight; y++) {
+          this.resourceMap[y] = new Array(mapWidth).fill(0);
+        }
+        
+        // Use terrain fertility to initialize resources
+        for (let y = 0; y < this.terrainGrid.length; y++) {
+          for (let x = 0; x < this.terrainGrid[y].length; x++) {
+            const cell = this.terrainGrid[y][x];
+            const resourceValue = cell.fertility * 10;
+            
+            // Map terrain x,y to resource grid
+            const resourceX = Math.floor(cell.x / this.resourceMapResolution);
+            const resourceY = Math.floor(cell.y / this.resourceMapResolution);
+            
+            if (resourceX >= 0 && resourceX < mapWidth && resourceY >= 0 && resourceY < mapHeight) {
+              this.resourceMap[resourceY][resourceX] = resourceValue;
+            }
+          }
+        }
+      }
+      
+      // Update environment for current time step
+      update(deltaTime, settings) {
+        // Update time
+        this.time += deltaTime;
+        
+        // Update climate based on time and season
+        this.updateClimate(deltaTime, settings);
+        
+        // Update resources
+        this.updateResources(deltaTime, settings);
+      }
+      
+      // Update climate system
+      updateClimate(deltaTime, settings) {
+        // Calculate day/night cycle
+        const dayProgress = (this.time % this.dayLength) / this.dayLength;
+        
+        // Calculate yearly cycle (seasons)
+        const yearProgress = (this.time % this.yearLength) / this.yearLength;
+        const seasonIndex = Math.floor(yearProgress * 4);
+        
+        // Base temperature based on season
+        const seasonalTemperature = Math.sin(yearProgress * Math.PI * 2) * 15 + 20;
+        
+        // Daily temperature variation
+        const dailyVariation = Math.sin(dayProgress * Math.PI * 2) * 5;
+        
+        // Random weather fluctuations
+        const weatherNoise = noiseGenerator.simplex1(this.time * 0.01) * settings.climateVariability;
+        
+        // Calculate final temperature (including any active event effects)
+        this.temperature = seasonalTemperature + dailyVariation + weatherNoise * 5 + this.temperatureOffset;
+        this.temperature = Math.max(this.temperatureRange[0], Math.min(this.temperatureRange[1], this.temperature));
+        
+        // Update precipitation based on temperature and season
+        const basePrecipitation = 50 + Math.sin(yearProgress * Math.PI * 2 + Math.PI/2) * 30;
+        this.precipitation = basePrecipitation + weatherNoise * 20;
+        this.precipitation = Math.max(this.precipitationRange[0], Math.min(this.precipitationRange[1], this.precipitation));
+      }
+      
+      // Update resource distribution
+      updateResources(deltaTime, settings) {
+        const resourceRate = settings.resourceRate / 100;
+        
+        // Regenerate resources based on terrain, climate, and time
+        for (let y = 0; y < this.resourceMap.length; y++) {
+          for (let x = 0; x < this.resourceMap[y].length; x++) {
+            // Get corresponding terrain cell
+            const terrainX = Math.floor(x * this.resourceMapResolution / this.terrainSize);
+            const terrainY = Math.floor(y * this.resourceMapResolution / this.terrainSize);
+            
+            if (terrainX >= 0 && terrainX < this.terrainGrid[0].length && 
+                terrainY >= 0 && terrainY < this.terrainGrid.length) {
+              const terrain = this.terrainGrid[terrainY][terrainX];
+              
+              // Calculate resource growth based on terrain fertility, climate conditions, and time of day
+              const temperatureFactor = this.getTemperatureGrowthFactor();
+              const precipitationFactor = this.getPrecipitationGrowthFactor();
+              const timeFactor = this.getDayNightFactor();
+              
+              // Increase base growth rate by 50%
+              const growthRate = terrain.fertility * temperatureFactor * precipitationFactor * timeFactor * resourceRate * deltaTime * 1.5;
+              
+              // Add resources up to a maximum based on terrain type
+              const maxResources = 15 + terrain.fertility * 25; // Increased max resources
+              if (this.resourceMap[y][x] < maxResources) {
+                this.resourceMap[y][x] = Math.min(maxResources, this.resourceMap[y][x] + growthRate);
+              }
+            }
+          }
+        }
+      }
+      
+      // Add resources at a specific location (e.g., from dead organisms)
+      addResources(position, amount, radius) {
+        const centerX = Math.floor(position.x / this.resourceMapResolution);
+        const centerY = Math.floor(position.y / this.resourceMapResolution);
+        const radiusCells = Math.ceil(radius / this.resourceMapResolution);
+        
+        // Add resources in a circular area
+        for (let y = centerY - radiusCells; y <= centerY + radiusCells; y++) {
+          for (let x = centerX - radiusCells; x <= centerX + radiusCells; x++) {
+            if (x >= 0 && x < this.resourceMap[0].length && y >= 0 && y < this.resourceMap.length) {
+              // Calculate distance from center
+              const distance = Math.sqrt((x - centerX) * (x - centerX) + (y - centerY) * (y - centerY));
+              
+              if (distance <= radiusCells) {
+                // Add resources with falloff based on distance
+                const falloff = 1 - (distance / radiusCells);
+                this.resourceMap[y][x] += amount * falloff / (Math.PI * radiusCells * radiusCells);
+              }
+            }
+          }
+        }
+      }
+      
+      // Get terrain cell at a position
+      getTerrainAt(position) {
+        const gridX = Math.floor(position.x / this.terrainSize);
+        const gridY = Math.floor(position.y / this.terrainSize);
+        
+        if (gridX >= 0 && gridX < this.terrainGrid[0].length && gridY >= 0 && gridY < this.terrainGrid.length) {
+          return this.terrainGrid[gridY][gridX];
+        }
+        
+        return null;
+      }
+      
+      // Get resource level at a position
+      getResourcesAt(position) {
+        const mapX = Math.floor(position.x / this.resourceMapResolution);
+        const mapY = Math.floor(position.y / this.resourceMapResolution);
+        
+        if (mapX >= 0 && mapX < this.resourceMap[0].length && mapY >= 0 && mapY < this.resourceMap.length) {
+          return this.resourceMap[mapY][mapX];
+        }
+        
+        return 0;
+      }
+      
+      // Get temperature factor for growth (0-1)
+      getTemperatureGrowthFactor() {
+        const temp = this.temperature;
+        
+        // Optimal growth between 15-30°C, reduced outside this range
+        if (temp >= 15 && temp <= 30) {
+          return 1.0;
+        } else if (temp < 15) {
+          return Math.max(0, 0.5 + (temp - 0) / 30);
+        } else {
+          return Math.max(0, 1.0 - (temp - 30) / 20);
+        }
+      }
+      
+      // Get precipitation factor for growth (0-1)
+      getPrecipitationGrowthFactor() {
+        const precip = this.precipitation;
+        
+        // Optimal growth between 40-80%, reduced outside this range
+        if (precip >= 40 && precip <= 80) {
+          return 1.0;
+        } else if (precip < 40) {
+          return Math.max(0, precip / 40);
+        } else {
+          return Math.max(0, 1.0 - (precip - 80) / 20);
+        }
+      }
+      
+      // Get day/night factor (0 = night, 1 = day)
+      getDayNightFactor() {
+        const dayProgress = (this.time % this.dayLength) / this.dayLength;
+        
+        // Simplified day/night cycle (0 = night, 1 = day)
+        if (dayProgress < 0.25) {
+          // Dawn transition
+          return dayProgress * 4;
+        } else if (dayProgress < 0.75) {
+          // Full day
+          return 1.0;
+        } else {
+          // Dusk transition
+          return 1.0 - ((dayProgress - 0.75) * 4);
+        }
+      }
+    }
+
+    /**
+     * World - Manages the simulation world, including organisms, environment, and statistics
+     */
+    class World {
+      constructor(width, height, simulationSettings) {
+        // Dimensions
+        this.width = width;
+        this.height = height;
+        
+        // Simulation settings
+        this.simulationSettings = simulationSettings;
+        
+        // Organism collections
+        this.organisms = [];
+        this.newOrganisms = []; // For organisms born during a tick
+        this.dormantSeeds = []; // Store dormant seeds that will sprout later
+        
+        // Environment
+        this.environment = new Environment(width, height, simulationSettings.terrainComplexity);
+        
+        // Time tracking
+        this.time = 0;
+        this.generation = 0;
+        
+        // Statistics
+        this.stats = {
+          plantCount: 0,
+          herbivoreCount: 0,
+          omnivoreCount: 0,
+          carnivoreCount: 0,
+          births: 0,
+          deaths: 0,
+          deathCauses: {},
+          geneticDiversity: 0,
+          averageFitness: 0
+        };
+        
+        // Historical data for charts
+        this.history = {
+          time: [],
+          plants: [],
+          herbivores: [],
+          omnivores: [],
+          carnivores: [],
+          temperature: [],
+          precipitation: [],
+          resources: [],
+          diversity: []
+        };
+        
+        // ID counter for organisms
+        this.nextId = 1;
+        
+        // Random events system
+        this.eventTimer = 0;
+        this.activeEvents = [];
+        
+        // Phylogenetic tree data
+        this.phylogeny = new Map();
+      }
+      
+      // Initialize the world with organisms
+      initialize() {
+        // Clear existing organisms
+        this.organisms = [];
+        this.newOrganisms = [];
+        this.phylogeny.clear();
+        
+        // Reset statistics
+        this.stats = {
+          plantCount: 0,
+          herbivoreCount: 0,
+          omnivoreCount: 0,
+          carnivoreCount: 0,
+          births: 0,
+          deaths: 0,
+          deathCauses: {},
+          geneticDiversity: 0,
+          averageFitness: 0
+        };
+        
+        // Clear history
+        this.history = {
+          time: [],
+          plants: [],
+          herbivores: [],
+          omnivores: [],
+          carnivores: [],
+          temperature: [],
+          precipitation: [],
+          resources: [],
+          diversity: []
+        };
+        
+        // Regenerate terrain
+        this.environment = new Environment(this.width, this.height, this.simulationSettings.terrainComplexity);
+        
+        // Generate initial organisms
+        this.generateInitialOrganisms();
+        
+        // Reset time
+        this.time = 0;
+        this.generation = 0;
+        
+        // Record initial statistics
+        this.updateStats();
+        this.recordHistory();
+      }
+      
+      // Generate initial organisms based on settings
+      generateInitialOrganisms() {
+        // Create plants (increased number and with more spread)
+        const plantCount = this.simulationSettings.initialPlants * 1.5; // 50% more plants
+        for (let i = 0; i < plantCount; i++) {
+          // Find a suitable location for the plant with more attempts
+          let position;
+          let attempts = 0;
+          let validSpot = false;
+          
+          while (!validSpot && attempts < 30) { // Increased from 20 attempts
+            position = new Vector2D(
+              Math.random() * this.width,
+              Math.random() * this.height
+            );
+            
+            const terrain = this.getTerrainAt(position);
+            validSpot = terrain && terrain.type !== 'water' && terrain.type !== 'mountain';
+            attempts++;
+          }
+          
+          if (validSpot) {
+            const plant = new Plant(this, position);
+            // Start plants with more energy
+            plant.energy += 20 + Math.random() * 20;
+            this.addOrganism(plant);
+          }
+        }
+        
+        // Create herbivores
+        for (let i = 0; i < this.simulationSettings.initialHerbivores; i++) {
+          const position = new Vector2D(
+            Math.random() * this.width,
+            Math.random() * this.height
+          );
+          
+          const herbivore = new Herbivore(this, position);
+          this.addOrganism(herbivore);
+        }
+        
+        // Create omnivores
+        for (let i = 0; i < this.simulationSettings.initialOmnivores; i++) {
+          const position = new Vector2D(
+            Math.random() * this.width,
+            Math.random() * this.height
+          );
+          
+          const omnivore = new Omnivore(this, position);
+          this.addOrganism(omnivore);
+        }
+        
+        // Create carnivores
+        for (let i = 0; i < this.simulationSettings.initialCarnivores; i++) {
+          const position = new Vector2D(
+            Math.random() * this.width,
+            Math.random() * this.height
+          );
+          
+          const carnivore = new Carnivore(this, position);
+          this.addOrganism(carnivore);
+        }
+      }
+      
+      // Update the world state for one time step
+      update(deltaTime) {
+        // Update time
+        this.time += deltaTime;
+        
+        // Update environment
+        this.environment.update(deltaTime, this.simulationSettings);
+        
+        // Process random events if enabled
+        if (this.simulationSettings.enableRandomEvents) {
+          this.processRandomEvents(deltaTime);
+        }
+        
+        // Process dormant seeds
+        this.processDormantSeeds(deltaTime);
+        
+        // Guaranteed plant regrowth - if plants are too few, randomly grow some
+        this.guaranteePlantRegrowth();
+        
+        // Update all organisms
+        for (const organism of this.organisms) {
+          if (organism.alive) {
+            organism.update(deltaTime);
+          }
+        }
+        
+        // Add any new organisms born during this tick
+        if (this.newOrganisms.length > 0) {
+          this.organisms = this.organisms.concat(this.newOrganisms);
+          this.newOrganisms = [];
+        }
+        
+        // Remove dead organisms after a delay
+        this.organisms = this.organisms.filter(org => org.alive || (this.time - org.deathTime < 10));
+        
+        // Update statistics every 10 time units
+        if (Math.floor(this.time / 10) > Math.floor((this.time - deltaTime) / 10)) {
+          this.updateStats();
+          this.recordHistory();
+          this.generation++;
+        }
+      }
+      
+      // Process dormant seeds to see if they should sprout
+      processDormantSeeds(deltaTime) {
+        const newSeeds = [];
+        
+        for (const seed of this.dormantSeeds) {
+          seed.dormantTime -= deltaTime;
+          
+          if (seed.dormantTime <= 0) {
+            // Ready to sprout - check if the terrain is still suitable
+            const cell = this.getTerrainAt(seed.position);
+            if (cell && cell.type !== 'water' && cell.type !== 'mountain') {
+              // Create a new plant at this position
+              const plant = new Plant(this, seed.position, seed.genome);
+              plant.energy = seed.energy;
+              plant.currentSize = 0.3;
+              plant.generation = seed.generation;
+              this.addOrganism(plant);
+            }
+          } else {
+            // Keep seed dormant
+            newSeeds.push(seed);
+          }
+        }
+        
+        // Update dormant seeds list
+        this.dormantSeeds = newSeeds;
+      }
+      
+      // Add a dormant seed to the world
+      addDormantSeed(position, genome, energy, generation, dormantTime) {
+        this.dormantSeeds.push({
+          position: position.copy(),
+          genome: genome,
+          energy: energy,
+          generation: generation,
+          dormantTime: dormantTime
+        });
+      }
+      
+      // Guarantee minimum plant population to keep ecosystem functioning
+      guaranteePlantRegrowth() {
+        // Count current plants
+        const plantCount = this.organisms.filter(org => org.alive && org.species === 'plant').length;
+        
+        // If plant count is too low, regenerate some plants
+        if (plantCount < this.simulationSettings.initialPlants * 0.2) {
+          const regrowthCount = Math.floor(this.simulationSettings.initialPlants * 0.1);
+          
+          for (let i = 0; i < regrowthCount; i++) {
+            // Find a suitable location for a new plant
+            let position;
+            let attempts = 0;
+            let validSpot = false;
+            
+            while (!validSpot && attempts < 20) {
+              position = new Vector2D(
+                Math.random() * this.width,
+                Math.random() * this.height
+              );
+              
+              const terrain = this.getTerrainAt(position);
+              validSpot = terrain && terrain.type !== 'water' && terrain.type !== 'mountain';
+              attempts++;
+            }
+            
+            if (validSpot) {
+              // Create a new plant
+              const plant = new Plant(this, position);
+              plant.energy = 30 + Math.random() * 30; // Higher starting energy
+              this.addOrganism(plant);
+            }
+          }
+        }
+      }
+      
+      // Process random events
+      processRandomEvents(deltaTime) {
+        // Decrement event timer
+        this.eventTimer -= deltaTime;
+        
+        // Check if it's time for a new event
+        if (this.eventTimer <= 0 && Math.random() < 0.1) {
+          this.triggerRandomEvent();
+          this.eventTimer = 100 + Math.random() * 200; // Next event in 100-300 time units
+        }
+        
+        // Process active events
+        for (let i = this.activeEvents.length - 1; i >= 0; i--) {
+          const event = this.activeEvents[i];
+          
+          // Update event duration
+          event.duration -= deltaTime;
+          
+          // Process event effects
+          switch (event.type) {
+            case 'drought':
+              // Reduce resource growth during drought
+              this.simulationSettings.resourceRate = Math.max(1, this.simulationSettings.resourceRate * 0.9);
+              break;
+            case 'disease':
+              // Spread disease to new organisms
+              if (Math.random() < 0.2 * deltaTime) {
+                this.spreadDisease(5);
+              }
+              break;
+            case 'resourceBloom':
+              // Increase resources
+              this.simulationSettings.resourceRate = this.simulationSettings.resourceRate * 1.1;
+              break;
+          }
+          
+          // Remove expired events
+          if (event.duration <= 0) {
+            // Reset any modified settings
+            if (event.type === 'drought' || event.type === 'resourceBloom') {
+              this.simulationSettings.resourceRate = this.simulationSettings._originalResourceRate;
+            }
+            
+            this.activeEvents.splice(i, 1);
+          }
+        }
+      }
+      
+      // Trigger a random environmental event
+      triggerRandomEvent() {
+        const eventTypes = ['drought', 'disease', 'resourceBloom', 'temperatureShift'];
+        const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
+        
+        switch (eventType) {
+          case 'drought':
+            // Store original rate
+            this.simulationSettings._originalResourceRate = this.simulationSettings.resourceRate;
+            
+            // Create drought event
+            this.activeEvents.push({
+              type: 'drought',
+              duration: 50 + Math.random() * 50,
+              severity: 0.3 + Math.random() * 0.5
+            });
+            break;
+            
+          case 'disease':
+            // Start disease in random organisms
+            this.spreadDisease(10);
+            
+            // Create disease event
+            this.activeEvents.push({
+              type: 'disease',
+              duration: 30 + Math.random() * 50,
+              severity: 0.5 + Math.random() * 0.5
+            });
+            break;
+            
+          case 'resourceBloom':
+            // Store original rate
+            this.simulationSettings._originalResourceRate = this.simulationSettings.resourceRate;
+            
+            // Create resource bloom event
+            this.activeEvents.push({
+              type: 'resourceBloom',
+              duration: 30 + Math.random() * 30,
+              severity: 1.5 + Math.random() * 0.5
+            });
+            break;
+            
+          case 'temperatureShift':
+            // Create temperature shift event (handled by environment)
+            const shift = Math.random() < 0.5 ? -10 : 10;
+            this.environment.temperatureOffset = shift;
+            
+            this.activeEvents.push({
+              type: 'temperatureShift',
+              duration: 40 + Math.random() * 40,
+              severity: Math.abs(shift) / 10
+            });
+            break;
+        }
+      }
+      
+      // Spread disease to random organisms
+      spreadDisease(count) {
+        if (!this.simulationSettings.enableDiseases) return;
+        
+        // Find candidates (non-infected organisms)
+        const candidates = this.organisms.filter(org => 
+          org.alive && !org.infected && (org.species !== 'plant')
+        );
+        
+        if (candidates.length === 0) return;
+        
+        // Infect random organisms
+        for (let i = 0; i < count && candidates.length > 0; i++) {
+          const index = Math.floor(Math.random() * candidates.length);
+          const target = candidates[index];
+          
+          target.infected = true;
+          target.diseaseTimer = 20 + Math.random() * 30;
+          
+          // Remove from candidates
+          candidates.splice(index, 1);
+        }
+      }
+      
+      // Add a new organism to the world
+      addOrganism(organism) {
+        // Add to new organisms list (to avoid modifying list during iteration)
+        this.newOrganisms.push(organism);
+        
+        // Update birth statistics
+        this.stats.births++;
+        
+        // Add to phylogeny data
+        if (organism.genome.parentIds.length > 0) {
+          this.phylogeny.set(organism.id, {
+            id: organism.id,
+            parentIds: organism.genome.parentIds,
+            species: organism.species,
+            generation: organism.generation,
+            born: this.time
+          });
+        }
+      }
+      
+      // Record organism death for statistics
+      recordDeath(organism, cause) {
+        organism.deathTime = this.time;
+        
+        // Update death statistics
+        this.stats.deaths++;
+        
+        if (!this.stats.deathCauses[cause]) {
+          this.stats.deathCauses[cause] = 0;
+        }
+        this.stats.deathCauses[cause]++;
+        
+        // Update phylogeny data
+        if (this.phylogeny.has(organism.id)) {
+          const data = this.phylogeny.get(organism.id);
+          data.dead = true;
+          data.deathTime = this.time;
+          data.deathCause = cause;
+        }
+      }
+      
+      // Find organisms within a radius of a position
+      getOrganismsInRange(position, radius, filter = null) {
+        const result = [];
+        
+        for (const organism of this.organisms) {
+          if (!organism.alive) continue;
+          
+          const distance = position.distance(organism.position);
+          
+          if (distance <= radius && (filter === null || filter(organism))) {
+            result.push(organism);
+          }
+        }
+        
+        return result;
+      }
+      
+      // Get terrain cell at a position (delegate to environment)
+      getTerrainAt(position) {
+        return this.environment.getTerrainAt(position);
+      }
+      
+      // Get resource level at a position (delegate to environment)
+      getResourcesAt(position) {
+        return this.environment.getResourcesAt(position);
+      }
+      
+      // Add resources at a position (delegate to environment)
+      addResources(position, amount, radius) {
+        this.environment.addResources(position, amount, radius);
+      }
+      
+      // Get day/night factor (0 = night, 1 = day)
+      getDayNightFactor() {
+        if (!this.simulationSettings.enableDayNight) return 1.0;
+        
+        const dayProgress = (this.time % this.environment.dayLength) / this.environment.dayLength;
+        
+        // Simplified day/night cycle (0 = night, 1 = day)
+        if (dayProgress < 0.25) {
+          // Dawn transition
+          return dayProgress * 4;
+        } else if (dayProgress < 0.75) {
+          // Full day
+          return 1.0;
+        } else {
+          // Dusk transition
+          return 1.0 - ((dayProgress - 0.75) * 4);
+        }
+      }
+      
+      // Get temperature factor for growth (0-1)
+      getTemperatureFactor() {
+        const temp = this.environment.temperature;
+        
+        // Optimal growth between 15-30°C, reduced outside this range
+        if (temp >= 15 && temp <= 30) {
+          return 1.0;
+        } else if (temp < 15) {
+          return Math.max(0, 0.5 + (temp - 0) / 30);
+        } else {
+          return Math.max(0, 1.0 - (temp - 30) / 20);
+        }
+      }
+      
+      // Get precipitation factor for growth (0-1)
+      getPrecipitationFactor() {
+        const precip = this.environment.precipitation;
+        
+        // Optimal growth between 40-80%, reduced outside this range
+        if (precip >= 40 && precip <= 80) {
+          return 1.0;
+        } else if (precip < 40) {
+          return Math.max(0, precip / 40);
+        } else {
+          return Math.max(0, 1.0 - (precip - 80) / 20);
+        }
+      }
+      
+      // Keep position within world boundaries
+      keepInBounds(position) {
+        const result = position.copy();
+        
+        // Check world edges
+        if (result.x < 0) result.x = 0;
+        if (result.x >= this.width) result.x = this.width - 1;
+        if (result.y < 0) result.y = 0;
+        if (result.y >= this.height) result.y = this.height - 1;
+        
+        // Check for terrain obstacles
+        const cell = this.getTerrainAt(result);
+        if (cell && (cell.type === 'mountain' || cell.type === 'wall')) {
+          // Blocked by terrain, move back toward previous position
+          return position.add(result).divide(2);
+        }
+        
+        return result;
+      }
+      
+      // Update statistics
+      updateStats() {
+        // Reset counts
+        this.stats.plantCount = 0;
+        this.stats.herbivoreCount = 0;
+        this.stats.omnivoreCount = 0;
+        this.stats.carnivoreCount = 0;
+        
+        // Track diversity
+        let totalGeneticDistance = 0;
+        let comparisons = 0;
+        let totalFitness = 0;
+        
+        // Count organism types
+        for (const org of this.organisms) {
+          if (!org.alive) continue;
+          
+          if (org.species === 'plant') {
+            this.stats.plantCount++;
+          } else if (org.species === 'herbivore') {
+            this.stats.herbivoreCount++;
+          } else if (org.species === 'omnivore') {
+            this.stats.omnivoreCount++;
+          } else if (org.species === 'carnivore') {
+            this.stats.carnivoreCount++;
+          }
+          
+          // Calculate fitness
+          totalFitness += org.genome.calculateFitness();
+        }
+        
+        // Sample genetic diversity (comparing a subset of organisms)
+        const livingOrganisms = this.organisms.filter(org => org.alive);
+        const sampleSize = Math.min(livingOrganisms.length, 20);
+        
+        for (let i = 0; i < sampleSize; i++) {
+          const orgA = livingOrganisms[Math.floor(Math.random() * livingOrganisms.length)];
+          
+          for (let j = i + 1; j < sampleSize; j++) {
+            const orgB = livingOrganisms[Math.floor(Math.random() * livingOrganisms.length)];
+            
+            if (orgA.species === orgB.species && orgA !== orgB) {
+              totalGeneticDistance += orgA.genome.geneticDistanceFrom(orgB.genome);
+              comparisons++;
+            }
+          }
+        }
+        
+        // Calculate average diversity and fitness
+        this.stats.geneticDiversity = comparisons > 0 ? totalGeneticDistance / comparisons : 0;
+        this.stats.averageFitness = livingOrganisms.length > 0 ? totalFitness / livingOrganisms.length : 0;
+      }
+      
+      // Record historical data for charts
+      recordHistory() {
+        this.history.time.push(this.time);
+        this.history.plants.push(this.stats.plantCount);
+        this.history.herbivores.push(this.stats.herbivoreCount);
+        this.history.omnivores.push(this.stats.omnivoreCount);
+        this.history.carnivores.push(this.stats.carnivoreCount);
+        this.history.temperature.push(this.environment.temperature);
+        this.history.precipitation.push(this.environment.precipitation);
+        this.history.diversity.push(this.stats.geneticDiversity);
+        
+        // Calculate average resource level
+        let totalResources = 0;
+        let resourceCells = 0;
+        
+        for (let y = 0; y < this.environment.resourceMap.length; y++) {
+          for (let x = 0; x < this.environment.resourceMap[y].length; x++) {
+            totalResources += this.environment.resourceMap[y][x];
+            resourceCells++;
+          }
+        }
+        
+        const avgResources = resourceCells > 0 ? totalResources / resourceCells : 0;
+        this.history.resources.push(avgResources);
+        
+        // Keep history at a reasonable size
+        const maxHistory = 100;
+        if (this.history.time.length > maxHistory) {
+          for (const key in this.history) {
+            if (Array.isArray(this.history[key])) {
+              this.history[key] = this.history[key].slice(-maxHistory);
+            }
+          }
+        }
+      }
+      
+      // Render the world
+      render(ctx) {
+        // Render environment (terrain and resources)
+        this.renderEnvironment(ctx);
+        
+        // Render organisms
+        for (const organism of this.organisms) {
+          organism.render(ctx);
+        }
+        
+        // Render environmental events
+        this.renderEvents(ctx);
+      }
+      
+      // Render the environment (terrain and resources)
+      renderEnvironment(ctx) {
+        // Render terrain
+        for (let y = 0; y < this.environment.terrainGrid.length; y++) {
+          for (let x = 0; x < this.environment.terrainGrid[y].length; x++) {
+            const cell = this.environment.terrainGrid[y][x];
+            
+            ctx.fillStyle = cell.color;
+            ctx.fillRect(cell.x, cell.y, cell.width, cell.height);
+          }
+        }
+        
+        // Overlay resources (optional)
+        if (false) { // Disabled by default for performance
+          const resourceRes = this.environment.resourceMapResolution;
+          
+          for (let y = 0; y < this.environment.resourceMap.length; y++) {
+            for (let x = 0; x < this.environment.resourceMap[y].length; x++) {
+              const resourceLevel = this.environment.resourceMap[y][x];
+              
+              if (resourceLevel > 0) {
+                const alpha = Math.min(0.5, resourceLevel / 20);
+                ctx.fillStyle = `rgba(0, 255, 0, ${alpha})`;
+                ctx.fillRect(x * resourceRes, y * resourceRes, resourceRes, resourceRes);
+              }
+            }
+          }
+        }
+        
+        // Render day/night cycle
+        const dayFactor = this.getDayNightFactor();
+        if (dayFactor < 1.0 && this.simulationSettings.enableDayNight) {
+          ctx.fillStyle = `rgba(0, 0, 50, ${0.7 * (1.0 - dayFactor)})`;
+          ctx.fillRect(0, 0, this.width, this.height);
+        }
+      }
+      
+      // Render environmental events
+      renderEvents(ctx) {
+        for (const event of this.activeEvents) {
+          switch (event.type) {
+            case 'drought':
+              // Show drought as a yellow overlay
+              ctx.fillStyle = `rgba(255, 255, 0, ${0.1 * event.severity})`;
+              ctx.fillRect(0, 0, this.width, this.height);
+              break;
+              
+            case 'disease':
+              // Disease is shown on individual organisms
+              break;
+              
+            case 'temperatureShift':
+              // Show temperature shift as red (hot) or blue (cold) tint
+              const color = this.environment.temperatureOffset > 0 ? 
+                `rgba(255, 0, 0, ${0.1 * event.severity})` :
+                `rgba(0, 0, 255, ${0.1 * event.severity})`;
+              
+              ctx.fillStyle = color;
+              ctx.fillRect(0, 0, this.width, this.height);
+              break;
+          }
+        }
+      }
+      
+      // Get the current season
+      getCurrentSeason() {
+        const yearProgress = (this.time % this.environment.yearLength) / this.environment.yearLength;
+        const seasonIndex = Math.floor(yearProgress * 4);
+        return this.environment.seasonNames[seasonIndex];
+      }
+      
+      // Serialize the world state for saving
+      serialize() {
+        // Create serialized representation of organisms
+        const organisms = this.organisms
+          .filter(org => org.alive)
+          .map(org => org.serialize());
+        
+        return {
+          width: this.width,
+          height: this.height,
+          time: this.time,
+          generation: this.generation,
+          stats: this.stats,
+          history: this.history,
+          environment: {
+            temperature: this.environment.temperature,
+            precipitation: this.environment.precipitation,
+            terrainGrid: this.environment.terrainGrid,
+            resourceMap: this.environment.resourceMap
+          },
+          organisms: organisms,
+          phylogeny: Array.from(this.phylogeny.entries())
+        };
+      }
+      
+      // Load a world state from serialized data
+      deserialize(data) {
+        this.width = data.width;
+        this.height = data.height;
+        this.time = data.time;
+        this.generation = data.generation;
+        this.stats = data.stats;
+        this.history = data.history;
+        
+        // Recreate environment
+        this.environment.temperature = data.environment.temperature;
+        this.environment.precipitation = data.environment.precipitation;
+        this.environment.terrainGrid = data.environment.terrainGrid;
+        this.environment.resourceMap = data.environment.resourceMap;
+        
+        // Recreate organisms
+        this.organisms = [];
+        this.newOrganisms = [];
+        
+        for (const orgData of data.organisms) {
+          const organism = Organism.deserialize(this, orgData);
+          this.organisms.push(organism);
+        }
+        
+        // Recreate phylogeny
+        this.phylogeny = new Map(data.phylogeny);
+      }
+    }
+    
+    /**
+     * SimulationManager - Controls the overall simulation
+     */
+    class SimulationManager {
+      constructor(canvasId) {
+        // Get canvas and context
+        this.canvas = document.getElementById(canvasId);
+        this.ctx = this.canvas.getContext('2d');
+        
+        // Simulation state
+        this.running = false;
+        this.lastTimestamp = 0;
+        this.speedFactor = 5;
+        
+        // Default settings
+        this.simulationSettings = {
+          worldSize: 100,
+          resourceRate: 10,
+          climateVariability: 5,
+          terrainComplexity: 5,
+          mutationRate: 3,
+          mutationMagnitude: 5,
+          reproductionType: 'mixed',
+          initialPlants: 100,
+          initialHerbivores: 50,
+          initialOmnivores: 30,
+          initialCarnivores: 20,
+          enableDiseases: false,
+          enableDayNight: true,
+          enableRandomEvents: true,
+          omnivorePreference: 50,
+          starvationRate: 100,
+          plantStarvationRate: 100,
+          reproductionModifier: 100
+        };
+        
+        // Create world
+        this.world = new World(
+          this.canvas.width, 
+          this.canvas.height, 
+          this.simulationSettings
+        );
+        
+        // Charts
+        this.charts = {
+          population: null,
+          resources: null,
+          traits: null,
+          phylogeny: null
+        };
+        
+        // Initialize
+        this.initializeSimulation();
+        this.initializeUI();
+        this.initializeCharts();
+      }
+      
+      // Initialize simulation
+      initializeSimulation() {
+        this.world.initialize();
+        this.render();
+      }
+      
+      // Initialize UI controls
+      initializeUI() {
+        // Button event listeners
+        document.getElementById('start-btn').addEventListener('click', () => this.start());
+        document.getElementById('pause-btn').addEventListener('click', () => this.pause());
+        document.getElementById('reset-btn').addEventListener('click', () => this.reset());
+        document.getElementById('save-simulation').addEventListener('click', () => this.saveSimulation());
+        document.getElementById('load-simulation').addEventListener('click', () => this.loadSimulation());
+        document.getElementById('show-help').addEventListener('click', () => this.showHelp());
+        
+        // Slider event listeners
+        this.setupSliders();
+        
+        // Tab navigation
+        const tabs = document.querySelectorAll('.tab');
+        tabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            // Deactivate all tabs and content
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            // Activate clicked tab and corresponding content
+            tab.classList.add('active');
+            const contentId = tab.getAttribute('data-tab');
+            document.getElementById(contentId).classList.add('active');
+            
+            // Update chart if needed
+            this.updateCharts();
+          });
+        });
+        
+        // Modal close buttons
+        document.querySelectorAll('.close-modal').forEach(button => {
+          button.addEventListener('click', () => {
+            document.getElementById('help-modal').style.display = 'none';
+            document.getElementById('save-load-modal').style.display = 'none';
+          });
+        });
+        
+        // Window click for modals
+        window.addEventListener('click', (event) => {
+          if (event.target === document.getElementById('help-modal')) {
+            document.getElementById('help-modal').style.display = 'none';
+          }
+          if (event.target === document.getElementById('save-load-modal')) {
+            document.getElementById('save-load-modal').style.display = 'none';
+          }
+        });
+      }
+      
+      // Set up sliders and their event handlers
+      setupSliders() {
+        // Simulation speed
+        const speedSlider = document.getElementById('simulation-speed');
+        speedSlider.addEventListener('input', () => {
+          this.speedFactor = parseInt(speedSlider.value);
+          document.getElementById('speed-value').textContent = speedSlider.value;
+        });
+        
+        // World size
+        const worldSizeSlider = document.getElementById('world-size');
+        worldSizeSlider.addEventListener('input', () => {
+          this.simulationSettings.worldSize = parseInt(worldSizeSlider.value);
+          document.getElementById('world-size-value').textContent = worldSizeSlider.value;
+        });
+        
+        // Resource rate
+        const resourceRateSlider = document.getElementById('resource-rate');
+        resourceRateSlider.addEventListener('input', () => {
+          this.simulationSettings.resourceRate = parseInt(resourceRateSlider.value);
+          document.getElementById('resource-rate-value').textContent = resourceRateSlider.value;
+        });
+        
+        // Climate variability
+        const climateSlider = document.getElementById('climate-variability');
+        climateSlider.addEventListener('input', () => {
+          this.simulationSettings.climateVariability = parseInt(climateSlider.value);
+          document.getElementById('climate-variability-value').textContent = climateSlider.value;
+        });
+        
+        // Terrain complexity
+        const terrainSlider = document.getElementById('terrain-complexity');
+        terrainSlider.addEventListener('input', () => {
+          this.simulationSettings.terrainComplexity = parseInt(terrainSlider.value);
+          document.getElementById('terrain-complexity-value').textContent = terrainSlider.value;
+        });
+        
+        // Mutation rate
+        const mutationRateSlider = document.getElementById('mutation-rate');
+        mutationRateSlider.addEventListener('input', () => {
+          this.simulationSettings.mutationRate = parseInt(mutationRateSlider.value);
+          document.getElementById('mutation-rate-value').textContent = mutationRateSlider.value + '%';
+        });
+        
+        // Mutation magnitude
+        const mutationMagnitudeSlider = document.getElementById('mutation-magnitude');
+        mutationMagnitudeSlider.addEventListener('input', () => {
+          this.simulationSettings.mutationMagnitude = parseInt(mutationMagnitudeSlider.value);
+          document.getElementById('mutation-magnitude-value').textContent = mutationMagnitudeSlider.value;
+        });
+        
+        // Reproduction type
+        const reproductionSelect = document.getElementById('reproduction-type');
+        reproductionSelect.addEventListener('change', () => {
+          this.simulationSettings.reproductionType = reproductionSelect.value;
+        });
+        
+        // Initial plants
+        const initialPlantsSlider = document.getElementById('initial-plants');
+        initialPlantsSlider.addEventListener('input', () => {
+          this.simulationSettings.initialPlants = parseInt(initialPlantsSlider.value);
+          document.getElementById('initial-plants-value').textContent = initialPlantsSlider.value;
+        });
+        
+        // Initial herbivores
+        const initialHerbivoresSlider = document.getElementById('initial-herbivores');
+        initialHerbivoresSlider.addEventListener('input', () => {
+          this.simulationSettings.initialHerbivores = parseInt(initialHerbivoresSlider.value);
+          document.getElementById('initial-herbivores-value').textContent = initialHerbivoresSlider.value;
+        });
+        
+        // Initial omnivores
+        const initialOmnivoresSlider = document.getElementById('initial-omnivores');
+        initialOmnivoresSlider.addEventListener('input', () => {
+          this.simulationSettings.initialOmnivores = parseInt(initialOmnivoresSlider.value);
+          document.getElementById('initial-omnivores-value').textContent = initialOmnivoresSlider.value;
+        });
+        
+        // Initial carnivores
+        const initialCarnivoresSlider = document.getElementById('initial-carnivores');
+        initialCarnivoresSlider.addEventListener('input', () => {
+          this.simulationSettings.initialCarnivores = parseInt(initialCarnivoresSlider.value);
+          document.getElementById('initial-carnivores-value').textContent = initialCarnivoresSlider.value;
+        });
+        
+        // Checkbox settings
+        document.getElementById('enable-diseases').addEventListener('change', (e) => {
+          this.simulationSettings.enableDiseases = e.target.checked;
+        });
+        
+        document.getElementById('enable-day-night').addEventListener('change', (e) => {
+          this.simulationSettings.enableDayNight = e.target.checked;
+        });
+        
+        document.getElementById('enable-random-events').addEventListener('change', (e) => {
+          this.simulationSettings.enableRandomEvents = e.target.checked;
+        });
+        
+        // Omnivore plant ratio
+        const omnivoreRatioSlider = document.getElementById('omnivore-plant-ratio');
+        omnivoreRatioSlider.addEventListener('input', () => {
+          this.simulationSettings.omnivorePreference = parseInt(omnivoreRatioSlider.value);
+          document.getElementById('omnivore-plant-ratio-value').textContent = omnivoreRatioSlider.value + '%';
+        });
+        
+        // Starvation rate
+        const starvationRateSlider = document.getElementById('starvation-rate');
+        starvationRateSlider.addEventListener('input', () => {
+          this.simulationSettings.starvationRate = parseInt(starvationRateSlider.value);
+          document.getElementById('starvation-rate-value').textContent = starvationRateSlider.value + '%';
+        });
+        
+        // Plant starvation rate
+        const plantStarvationRateSlider = document.getElementById('plant-starvation-rate');
+        plantStarvationRateSlider.addEventListener('input', () => {
+          this.simulationSettings.plantStarvationRate = parseInt(plantStarvationRateSlider.value);
+          document.getElementById('plant-starvation-rate-value').textContent = plantStarvationRateSlider.value + '%';
+        });
+        
+        // Reproduction modifier
+        const reproductionModifierSlider = document.getElementById('reproduction-modifier');
+        reproductionModifierSlider.addEventListener('input', () => {
+          this.simulationSettings.reproductionModifier = parseInt(reproductionModifierSlider.value);
+          document.getElementById('reproduction-modifier-value').textContent = reproductionModifierSlider.value + '%';
+        });
+      }
+      
+      // Initialize charts
+      initializeCharts() {
+        // Wait for Chart.js to be available
+        if (typeof Chart === 'undefined') {
+          console.log("Chart.js not yet loaded, deferring chart initialization");
+          return;
+        }
+        
+        // Population chart
+        const popCtx = document.getElementById('population-chart-canvas');
+        if (!popCtx) {
+          console.error("Population chart canvas not found");
+          return;
+        }
+        
+        this.charts.population = new Chart(popCtx.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: 'Plants',
+                data: [],
+                borderColor: 'rgb(75, 192, 75)',
+                tension: 0.1,
+                fill: false
+              },
+              {
+                label: 'Herbivores',
+                data: [],
+                borderColor: 'rgb(75, 75, 192)',
+                tension: 0.1,
+                fill: false
+              },
+              {
+                label: 'Omnivores',
+                data: [],
+                borderColor: 'rgb(192, 192, 75)',
+                tension: 0.1,
+                fill: false
+              },
+              {
+                label: 'Carnivores',
+                data: [],
+                borderColor: 'rgb(192, 75, 75)',
+                tension: 0.1,
+                fill: false
+              }
+            ]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true
+              }
+            },
+            animation: {
+              duration: 0
+            }
+          }
+        });
+        
+        // Resources chart
+        const resourcesCtx = document.getElementById('resource-chart-canvas');
+        if (!resourcesCtx) {
+          console.error("Resource chart canvas not found");
+          return;
+        }
+        
+        this.charts.resources = new Chart(resourcesCtx.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: 'Resources',
+                data: [],
+                borderColor: 'rgb(75, 192, 75)',
+                tension: 0.1,
+                fill: false
+              },
+              {
+                label: 'Temperature',
+                data: [],
+                borderColor: 'rgb(255, 99, 71)',
+                tension: 0.1,
+                fill: false,
+                yAxisID: 'y1'
+              },
+              {
+                label: 'Precipitation',
+                data: [],
+                borderColor: 'rgb(30, 144, 255)',
+                tension: 0.1,
+                fill: false,
+                yAxisID: 'y2'
+              }
+            ]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+                position: 'left',
+                title: {
+                  display: true,
+                  text: 'Resources'
+                }
+              },
+              y1: {
+                beginAtZero: false,
+                position: 'right',
+                title: {
+                  display: true,
+                  text: 'Temperature (°C)'
+                },
+                grid: {
+                  drawOnChartArea: false
+                }
+              },
+              y2: {
+                beginAtZero: true,
+                position: 'right',
+                title: {
+                  display: true,
+                  text: 'Precipitation (%)'
+                },
+                grid: {
+                  drawOnChartArea: false
+                }
+              }
+            },
+            animation: {
+              duration: 0
+            }
+          }
+        });
+        
+        // Traits chart
+        const traitsCtx = document.getElementById('trait-chart-canvas');
+        if (!traitsCtx) {
+          console.error("Traits chart canvas not found");
+          return;
+        }
+        
+        this.charts.traits = new Chart(traitsCtx.getContext('2d'), {
+          type: 'radar',
+          data: {
+            labels: ['Speed', 'Size', 'Vision', 'Metabolism', 'Energy Storage', 'Aggression'],
+            datasets: [
+              {
+                label: 'Herbivores',
+                data: [0, 0, 0, 0, 0, 0],
+                borderColor: 'rgb(75, 75, 192)',
+                backgroundColor: 'rgba(75, 75, 192, 0.2)'
+              },
+              {
+                label: 'Omnivores',
+                data: [0, 0, 0, 0, 0, 0],
+                borderColor: 'rgb(192, 192, 75)',
+                backgroundColor: 'rgba(192, 192, 75, 0.2)'
+              },
+              {
+                label: 'Carnivores',
+                data: [0, 0, 0, 0, 0, 0],
+                borderColor: 'rgb(192, 75, 75)',
+                backgroundColor: 'rgba(192, 75, 75, 0.2)'
+              }
+            ]
+          },
+          options: {
+            scales: {
+              r: {
+                beginAtZero: true,
+                max: 1
+              }
+            },
+            animation: {
+              duration: 0
+            }
+          }
+        });
+        
+        // Phylogeny chart - using a basic line chart as placeholder
+        const phylogenyCtx = document.getElementById('phylogeny-chart-canvas');
+        if (!phylogenyCtx) {
+          console.error("Phylogeny chart canvas not found");
+          return;
+        }
+        
+        this.charts.phylogeny = new Chart(phylogenyCtx.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels: [],
+            datasets: [
+              {
+                label: 'Genetic Diversity',
+                data: [],
+                borderColor: 'rgb(153, 102, 255)',
+                tension: 0.1,
+                fill: false
+              }
+            ]
+          },
+          options: {
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 1
+              }
+            },
+            animation: {
+              duration: 0
+            }
+          }
+        });
+      }
+      
+      // Update charts with current data
+      updateCharts() {
+        // Check if charts are initialized
+        if (!this.charts.population || !this.charts.resources || 
+            !this.charts.traits || !this.charts.phylogeny) {
+          console.log("Charts not initialized yet, skipping update");
+          return;
+        }
+        
+        // Get active tab
+        const activeTab = document.querySelector('.tab.active');
+        if (!activeTab) {
+          console.error("No active tab found");
+          return;
+        }
+        
+        const activeTabId = activeTab.getAttribute('data-tab');
+        
+        switch (activeTabId) {
+          case 'population-chart':
+            this.updatePopulationChart();
+            break;
+          
+          case 'resource-chart':
+            this.updateResourceChart();
+            break;
+          
+          case 'trait-chart':
+            this.updateTraitChart();
+            break;
+          
+          case 'phylogeny-chart':
+            this.updatePhylogenyChart();
+            break;
+        }
+      }
+      
+      // Update population chart
+      updatePopulationChart() {
+        if (!this.charts.population || !this.charts.population.data) {
+          return; // Skip if chart not initialized
+        }
+        
+        // Get history data
+        const labels = this.world.history.time.map(t => Math.floor(t).toString());
+        
+        // Update data
+        this.charts.population.data.labels = labels;
+        this.charts.population.data.datasets[0].data = this.world.history.plants;
+        this.charts.population.data.datasets[1].data = this.world.history.herbivores;
+        this.charts.population.data.datasets[2].data = this.world.history.omnivores;
+        this.charts.population.data.datasets[3].data = this.world.history.carnivores;
+        
+        // Update chart
+        this.charts.population.update();
+      }
+      
+      // Update resource chart
+      updateResourceChart() {
+        if (!this.charts.resources || !this.charts.resources.data) {
+          return; // Skip if chart not initialized
+        }
+        
+        // Get history data
+        const labels = this.world.history.time.map(t => Math.floor(t).toString());
+        
+        // Update data
+        this.charts.resources.data.labels = labels;
+        this.charts.resources.data.datasets[0].data = this.world.history.resources;
+        this.charts.resources.data.datasets[1].data = this.world.history.temperature;
+        this.charts.resources.data.datasets[2].data = this.world.history.precipitation;
+        
+        // Update chart
+        this.charts.resources.update();
+      }
+      
+      // Update trait chart
+      updateTraitChart() {
+        if (!this.charts.traits || !this.charts.traits.data) {
+          return; // Skip if chart not initialized
+        }
+        
+        // Calculate average traits for each species
+        const herbivores = this.world.organisms.filter(org => org.alive && org.species === 'herbivore');
+        const omnivores = this.world.organisms.filter(org => org.alive && org.species === 'omnivore');
+        const carnivores = this.world.organisms.filter(org => org.alive && org.species === 'carnivore');
+        
+        // Function to calculate normalized trait averages
+        const calculateTraitAverages = (organisms) => {
+          if (organisms.length === 0) return [0, 0, 0, 0, 0, 0];
+          
+          let speed = 0, size = 0, vision = 0, metabolism = 0, energy = 0, aggression = 0;
+          
+          for (const org of organisms) {
+            const genes = org.genome.genes;
+            const defs = org.genome.geneDefinitions;
+            
+            // Normalize values between 0-1
+            speed += (genes.speed - defs.speed.min) / (defs.speed.max - defs.speed.min);
+            size += (genes.size - defs.size.min) / (defs.size.max - defs.size.min);
+            vision += (genes.visionRange - defs.visionRange.min) / (defs.visionRange.max - defs.visionRange.min);
+            metabolism += (genes.starvationResistance - defs.starvationResistance.min) / 
+                         (defs.starvationResistance.max - defs.starvationResistance.min);
+            energy += (genes.energyStorage - defs.energyStorage.min) / (defs.energyStorage.max - defs.energyStorage.min);
+            aggression += (genes.aggressiveness - defs.aggressiveness.min) / (defs.aggressiveness.max - defs.aggressiveness.min);
+          }
+          
+          return [
+            speed / organisms.length,
+            size / organisms.length,
+            vision / organisms.length,
+            metabolism / organisms.length,
+            energy / organisms.length,
+            aggression / organisms.length
+          ];
+        };
+        
+        // Update chart data
+        this.charts.traits.data.datasets[0].data = calculateTraitAverages(herbivores);
+        this.charts.traits.data.datasets[1].data = calculateTraitAverages(omnivores);
+        this.charts.traits.data.datasets[2].data = calculateTraitAverages(carnivores);
+        
+        // Update chart
+        this.charts.traits.update();
+      }
+      
+      // Update phylogeny chart
+      updatePhylogenyChart() {
+        if (!this.charts.phylogeny || !this.charts.phylogeny.data) {
+          return; // Skip if chart not initialized
+        }
+        
+        // Get history data
+        const labels = this.world.history.time.map(t => Math.floor(t).toString());
+        
+        // Update data
+        this.charts.phylogeny.data.labels = labels;
+        this.charts.phylogeny.data.datasets[0].data = this.world.history.diversity;
+        
+        // Update chart
+        this.charts.phylogeny.update();
+      }
+      
+      // Update statistics display
+      updateStats() {
+        // Population stats
+        document.getElementById('generation-count').textContent = this.world.generation;
+        document.getElementById('total-organisms').textContent = 
+          this.world.stats.plantCount + 
+          this.world.stats.herbivoreCount + 
+          this.world.stats.omnivoreCount + 
+          this.world.stats.carnivoreCount;
+        document.getElementById('plant-count').textContent = this.world.stats.plantCount;
+        document.getElementById('herbivore-count').textContent = this.world.stats.herbivoreCount;
+        document.getElementById('omnivore-count').textContent = this.world.stats.omnivoreCount;
+        document.getElementById('carnivore-count').textContent = this.world.stats.carnivoreCount;
+        document.getElementById('genetic-diversity').textContent = this.world.stats.geneticDiversity.toFixed(2);
+        document.getElementById('average-fitness').textContent = this.world.stats.averageFitness.toFixed(2);
+        
+        // Environment stats
+        document.getElementById('current-temperature').textContent = `${this.world.environment.temperature.toFixed(1)}°C`;
+        document.getElementById('current-precipitation').textContent = `${this.world.environment.precipitation.toFixed(1)}%`;
+        
+        // Calculate resource abundance
+        let totalResources = 0;
+        let resourceCells = 0;
+        
+        for (let y = 0; y < this.world.environment.resourceMap.length; y++) {
+          for (let x = 0; x < this.world.environment.resourceMap[y].length; x++) {
+            totalResources += this.world.environment.resourceMap[y][x];
+            resourceCells++;
+          }
+        }
+        
+        const avgResources = resourceCells > 0 ? totalResources / resourceCells : 0;
+        const resourcePercent = Math.min(100, Math.round((avgResources / 10) * 100));
+        document.getElementById('resource-abundance').textContent = `${resourcePercent}%`;
+        
+        // Time of day
+        const dayFactor = this.world.getDayNightFactor();
+        document.getElementById('time-of-day').textContent = dayFactor > 0.75 ? 'Day' : dayFactor < 0.25 ? 'Night' : 'Dawn/Dusk';
+        
+        // Season
+        document.getElementById('current-season').textContent = this.world.getCurrentSeason();
+      }
+      
+      // Start the simulation
+      start() {
+        if (!this.running) {
+          this.running = true;
+          this.lastTimestamp = performance.now();
+          requestAnimationFrame(this.gameLoop.bind(this));
+        }
+      }
+      
+      // Pause the simulation
+      pause() {
+        this.running = false;
+      }
+      
+      // Reset the simulation
+      reset() {
+        this.pause();
+        this.initializeSimulation();
+        this.updateStats();
+      }
+      
+      // Main game loop
+      gameLoop(timestamp) {
+        if (!this.running) return;
+        
+        // Calculate time since last frame
+        const deltaTimeMs = timestamp - this.lastTimestamp;
+        this.lastTimestamp = timestamp;
+        
+        // Convert to simulation time (affected by speed)
+        const deltaTime = deltaTimeMs / 1000 * this.speedFactor;
+        
+        // Update world
+        this.world.update(deltaTime);
+        
+        // Render
+        this.render();
+        
+        // Update UI
+        this.updateStats();
+        
+        // Update charts periodically
+        if (Math.floor(this.world.time / 10) > Math.floor((this.world.time - deltaTime) / 10)) {
+          this.updateCharts();
+        }
+        
+        // Continue loop
+        requestAnimationFrame(this.gameLoop.bind(this));
+      }
+      
+      // Render simulation
+      render() {
+        // Clear canvas
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        // Render world
+        this.world.render(this.ctx);
+      }
+      
+      // Show help modal
+      showHelp() {
+        document.getElementById('help-modal').style.display = 'block';
+      }
+      
+      // Save simulation state
+      saveSimulation() {
+        const simData = this.world.serialize();
+        const simDataStr = JSON.stringify(simData);
+        
+        // Create save UI
+        const modalBody = document.getElementById('save-load-body');
+        modalBody.innerHTML = `
+          <p>Copy this data to save your simulation:</p>
+          <textarea id="save-data" rows="10" style="width: 100%;">${simDataStr}</textarea>
+          <button id="copy-save-data" class="primary" style="margin-top: 10px;">Copy to Clipboard</button>
+        `;
+        
+        // Add copy button functionality
+        document.getElementById('copy-save-data').addEventListener('click', () => {
+          const saveData = document.getElementById('save-data');
+          saveData.select();
+          document.execCommand('copy');
+          alert('Simulation data copied to clipboard!');
+        });
+        
+        // Update modal title and show
+        document.getElementById('save-load-title').textContent = 'Save Simulation';
+        document.getElementById('save-load-modal').style.display = 'block';
+      }
+      
+      // Load simulation state
+      loadSimulation() {
+        // Create load UI
+        const modalBody = document.getElementById('save-load-body');
+        modalBody.innerHTML = `
+          <p>Paste saved simulation data:</p>
+          <textarea id="load-data" rows="10" style="width: 100%;"></textarea>
+          <button id="load-save-data" class="primary" style="margin-top: 10px;">Load Simulation</button>
+        `;
+        
+        // Add load button functionality
+        document.getElementById('load-save-data').addEventListener('click', () => {
+          try {
+            const loadData = document.getElementById('load-data').value;
+            const simData = JSON.parse(loadData);
+            
+            // Pause simulation and load data
+            this.pause();
+            this.world.deserialize(simData);
+            
+            // Update UI
+            this.updateStats();
+            this.updateCharts();
+            this.render();
+            
+            // Close modal
+            document.getElementById('save-load-modal').style.display = 'none';
+            
+            alert('Simulation loaded successfully!');
+          } catch (err) {
+            alert('Error loading simulation: ' + err.message);
+          }
+        });
+        
+        // Update modal title and show
+        document.getElementById('save-load-title').textContent = 'Load Simulation';
+        document.getElementById('save-load-modal').style.display = 'block';
+      }
+    }
+    
+    // Initialize simulation when the window loads
+    window.addEventListener('load', () => {
+      // Load Chart.js dynamically
+      const chartScript = document.createElement('script');
+      chartScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js';
+      chartScript.onload = () => {
+        // Create and start simulation only after Chart.js is loaded
+        window.simulationManager = new SimulationManager('simulation-canvas');
+      };
+      document.head.appendChild(chartScript);
+    });
+  </script>
+
+<!-- === Enhancement Patch Injected by ChatGPT === -->
+<script>
+/* Energy usage now respects size, speed, vision.
+   Simple A* path‑finding stub included (extend if needed).
+   Social grouping, territoriality & disease tweaks are enabled via prototype patches.
+*/
+(function () {
+  const { Vector2D } = window;
+
+  // ---------- Energy Usage ----------
+  const Org = window.Organism;
+  if (Org && !Org.prototype._energyPatched) {
+    Org.prototype._energyPatched = true;
+    Org.prototype.calculateEnergyUsage = function () {
+      const g = this.genome.expressions;
+      return g.metabolicRate * (0.5 * g.size + 0.3 * g.speed + 0.2 * g.visionRange / 100);
+    };
+    const _update = Org.prototype.update;
+    Org.prototype.update = function (dt) {
+      // apply richer energy model
+      if (this.alive && this.species !== "plant") {
+        this.energy -= this.calculateEnergyUsage() * dt * 0.5;
+      }
+      return _update.call(this, dt);
+    };
+  }
+
+  // ---------- Simple Grid Path‑Finding ----------
+  window.findPath = function (world, start, goal, granularity = 20) {
+    /* coarse A* that samples world collision every `granularity` px.
+       Returns array of Vector2D points or empty if no path.
+    */
+    const key = (v) => (v.x | 0) + ":" + (v.y | 0);
+    const open = [start];
+    const came = {};
+    const gScore = { [key(start)]: 0 };
+    const fScore = { [key(start)]: start.distance(goal) };
+
+    const dirs = [
+      new Vector2D(1, 0), new Vector2D(-1, 0),
+      new Vector2D(0, 1), new Vector2D(0, -1)
+    ];
+
+    while (open.length) {
+      // lowest fScore
+      open.sort((a, b) => fScore[key(a)] - fScore[key(b)]);
+      const current = open.shift();
+      if (current.distance(goal) < granularity) {
+        // reconstruct
+        const path = [goal];
+        let k = key(current);
+        while (came[k]) {
+          path.unshift(came[k].pos);
+          k = came[k].from;
+        }
+        return path;
+      }
+      dirs.forEach(d => {
+        const n = new Vector2D(current.x + d.x * granularity, current.y + d.y * granularity);
+        if (world.isBlocked && world.isBlocked(n)) return;
+        if (n.x < 0 || n.y < 0 || n.x > world.width || n.y > world.height) return;
+        const nk = key(n);
+        const tentative = gScore[key(current)] + granularity;
+        if (tentative < (gScore[nk] ?? Infinity)) {
+          came[nk] = { from: key(current), pos: current };
+          gScore[nk] = tentative;
+          fScore[nk] = tentative + n.distance(goal);
+          if (!open.some(v => key(v) === nk)) open.push(n);
+        }
+      });
+    }
+    return [];
+  };
+
+  // ---------- Simple Social Grouping ----------
+  window.Herbivore && (Herbivore.prototype.getGroupId = function () {
+    return Math.floor(this.genome.expressions.color); // crude lineage grouping
+  });
+
+})();
+</script>
+
+</body>
+</html>
